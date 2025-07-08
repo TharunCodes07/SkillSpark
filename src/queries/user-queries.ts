@@ -44,3 +44,18 @@ export async function clearUserData() {
     console.error("Error clearing storage:", error);
   }
 }
+
+export async function fetchUserDescription() {
+  const user = await fetchUser();
+  return user?.description || "";
+}
+
+export async function setUserDescription(description: string) {
+  try {
+    const user = (await fetchUser()) || {};
+    user.description = description;
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch (error) {
+    console.error("Error setting user description:", error);
+  }
+}

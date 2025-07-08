@@ -1,31 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
-import { fetchUserName, setUserName } from "~/queries/user-queries";
+import {
+  fetchUserDescription,
+  setUserDescription,
+} from "~/queries/user-queries";
 import { Input } from "~/components/ui/input";
 import BottomSheet from "~/components/ui/BottomSheet";
 import Icon from "~/lib/icons/Icon";
 
-export default function NameSetting() {
-  const [name, setName] = useState("");
-  const [tempName, setTempName] = useState("");
+export default function DescriptionSetting() {
+  const [description, setDescription] = useState("");
+  const [tempDescription, setTempDescription] = useState("");
   const [showBottomSheet, setShowBottomSheet] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const storedName = await fetchUserName();
-      setName(storedName);
-      setTempName(storedName);
+      const storedDescription = await fetchUserDescription();
+      setDescription(storedDescription);
+      setTempDescription(storedDescription);
     })();
   }, []);
 
   const handleSave = async () => {
-    setName(tempName);
-    await setUserName(tempName);
+    setDescription(tempDescription);
+    await setUserDescription(tempDescription);
     setShowBottomSheet(false);
   };
 
   const handleCancel = () => {
-    setTempName(name);
+    setTempDescription(description);
     setShowBottomSheet(false);
   };
 
@@ -37,10 +40,11 @@ export default function NameSetting() {
       >
         <View className="flex-1">
           <Text className="text-base font-medium text-foreground mb-1">
-            Full Name
+            About You
           </Text>
           <Text className="text-sm text-muted-foreground">
-            {name || "Enter your full name"}
+            {description ||
+              "Tell us about yourself (e.g., student, professional, etc.)"}
           </Text>
         </View>
         <Icon name="ChevronRight" size={16} />
@@ -48,14 +52,20 @@ export default function NameSetting() {
 
       <BottomSheet isVisible={showBottomSheet} onClose={handleCancel}>
         <View className="p-4">
-          <Text className="text-xl font-bold text-foreground mb-4">
-            Full Name
+          <Text className="text-xl font-bold text-foreground mb-2">
+            About You
+          </Text>
+          <Text className="text-sm text-muted-foreground mb-4">
+            Tell us a bit about yourself
           </Text>
           <Input
-            value={tempName}
-            onChangeText={setTempName}
-            placeholder="Enter your full name"
-            className="mb-6"
+            value={tempDescription}
+            onChangeText={setTempDescription}
+            placeholder="e.g., Computer Science student, Software Engineer, etc."
+            multiline={true}
+            numberOfLines={4}
+            textAlignVertical="top"
+            className="mb-6 min-h-24"
           />
 
           <View className="flex-row gap-3">

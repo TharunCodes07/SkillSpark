@@ -1,37 +1,30 @@
 import React from "react";
-import { View, Text, Switch } from "react-native";
-import { useColorScheme } from "~/utils/useColorScheme";
+import { View, Text, Pressable } from "react-native";
+import { useColorScheme } from "~/lib/utils/useColorScheme";
+import Icon from "~/lib/icons/Icon";
 
 export default function ThemeSetting() {
-  const colorSchemeObj = useColorScheme();
-  let colorScheme: string | undefined = undefined;
-  let setColorScheme: ((scheme: string) => void) | undefined = undefined;
+  const { colorScheme, setColorScheme } = useColorScheme();
 
-  if (
-    colorSchemeObj &&
-    typeof colorSchemeObj === "object" &&
-    "colorScheme" in colorSchemeObj &&
-    "setColorScheme" in colorSchemeObj
-  ) {
-    colorScheme = (colorSchemeObj as any).colorScheme;
-    setColorScheme = (colorSchemeObj as any).setColorScheme;
-  } else if (typeof colorSchemeObj === "string") {
-    colorScheme = colorSchemeObj;
-  }
+  const toggleTheme = () => {
+    setColorScheme && setColorScheme(colorScheme === "dark" ? "light" : "dark");
+  };
 
   return (
-    <View className="mb-4 flex-row justify-between items-center">
-      <Text className="text-lg font-semibold text-black dark:text-white">
-        Dark Mode
-      </Text>
-      <Switch
-        value={colorScheme === "dark"}
-        onValueChange={() =>
-          setColorScheme &&
-          setColorScheme(colorScheme === "dark" ? "light" : "dark")
-        }
+    <View className="mb-6">
+      <Pressable
+        onPress={toggleTheme}
         disabled={!setColorScheme}
-      />
+        className="flex-row justify-between items-center py-3"
+      >
+        <View className="flex-1">
+          <Text className="text-base font-medium text-foreground">Theme</Text>
+          <Text className="text-sm text-muted-foreground mt-1">
+            {colorScheme === "dark" ? "Dark mode" : "Light mode"}
+          </Text>
+        </View>
+        <Icon name={colorScheme === "dark" ? "Moon" : "Sun"} size={20} />
+      </Pressable>
     </View>
   );
 }
