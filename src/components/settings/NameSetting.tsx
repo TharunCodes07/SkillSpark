@@ -5,11 +5,13 @@ import { Input } from "~/components/ui/input";
 import BottomSheet from "~/components/ui/BottomSheet";
 import Icon from "~/lib/icons/Icon";
 import { useFocusEffect } from "expo-router";
+import { useDataRefresh } from "~/lib/utils/DataRefreshContext";
 
 export default function NameSetting() {
   const [name, setName] = useState("");
   const [tempName, setTempName] = useState("");
   const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const { refreshTrigger } = useDataRefresh();
 
   const loadName = async () => {
     const storedName = await fetchUserName();
@@ -27,6 +29,11 @@ export default function NameSetting() {
       loadName();
     }, [])
   );
+
+  // Refresh data when refresh is triggered
+  useEffect(() => {
+    loadName();
+  }, [refreshTrigger]);
 
   const handleSave = async () => {
     setName(tempName);

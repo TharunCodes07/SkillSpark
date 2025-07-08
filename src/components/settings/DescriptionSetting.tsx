@@ -8,11 +8,13 @@ import { Input } from "~/components/ui/input";
 import BottomSheet from "~/components/ui/BottomSheet";
 import Icon from "~/lib/icons/Icon";
 import { useFocusEffect } from "expo-router";
+import { useDataRefresh } from "~/lib/utils/DataRefreshContext";
 
 export default function DescriptionSetting() {
   const [description, setDescription] = useState("");
   const [tempDescription, setTempDescription] = useState("");
   const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const { refreshTrigger } = useDataRefresh();
 
   const loadDescription = async () => {
     const storedDescription = await fetchUserDescription();
@@ -30,6 +32,11 @@ export default function DescriptionSetting() {
       loadDescription();
     }, [])
   );
+
+  // Refresh data when refresh is triggered
+  useEffect(() => {
+    loadDescription();
+  }, [refreshTrigger]);
 
   const handleSave = async () => {
     setDescription(tempDescription);

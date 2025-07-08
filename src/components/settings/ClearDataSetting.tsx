@@ -3,13 +3,16 @@ import { View, Text, Pressable, Alert } from "react-native";
 import { clearUserData } from "~/queries/user-queries";
 import BottomSheet from "~/components/ui/BottomSheet";
 import Icon from "~/lib/icons/Icon";
+import { useDataRefresh } from "~/lib/utils/DataRefreshContext";
 
 export default function ClearDataSetting() {
   const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const { triggerRefresh } = useDataRefresh();
 
   const handleClearData = async () => {
     await clearUserData();
     setShowBottomSheet(false);
+    triggerRefresh(); // Trigger refresh for all components
     Alert.alert("Success", "All data has been cleared successfully.");
   };
 

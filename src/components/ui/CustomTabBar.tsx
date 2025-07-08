@@ -88,11 +88,9 @@ export default function CustomTabBar({
                 : "transparent",
               transform: [{ scale: isFocused ? 1.05 : 1 }],
             }}
-            android_ripple={{
-              color: isDarkColorScheme ? "#ffffff15" : "#00000008",
-              borderless: true,
-              radius: 40,
-            }}
+            android_ripple={null}
+            pressRetentionOffset={{ top: 0, left: 0, bottom: 0, right: 0 }}
+            hitSlop={{ top: 0, left: 0, bottom: 0, right: 0 }}
           >
             <View
               style={{

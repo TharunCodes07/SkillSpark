@@ -4,6 +4,7 @@ import { fetchUser, setUserPreferences } from "~/queries/user-queries";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 import BottomSheet from "~/components/ui/BottomSheet";
 import Icon from "~/lib/icons/Icon";
+import { useDataRefresh } from "~/lib/utils/DataRefreshContext";
 
 export default function PreferencesSetting() {
   const [depth, setDepth] = useState("Balanced");
@@ -11,16 +12,27 @@ export default function PreferencesSetting() {
   const [showDepthSheet, setShowDepthSheet] = useState(false);
   const [showVideoLengthSheet, setShowVideoLengthSheet] = useState(false);
   const { isDarkColorScheme } = useColorScheme();
+  const { refreshTrigger } = useDataRefresh();
+
+  const loadPreferences = async () => {
+    const user = await fetchUser();
+    if (user?.preferences) {
+      setDepth(user.preferences.depth || "Balanced");
+      setVideoLength(user.preferences.videoLength || "Medium");
+    } else {
+      setDepth("Balanced");
+      setVideoLength("Medium");
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      const user = await fetchUser();
-      if (user?.preferences) {
-        setDepth(user.preferences.depth || "Balanced");
-        setVideoLength(user.preferences.videoLength || "Medium");
-      }
-    })();
+    loadPreferences();
   }, []);
+
+  // Refresh data when refresh is triggered
+  useEffect(() => {
+    loadPreferences();
+  }, [refreshTrigger]);
 
   const updatePreferences = async (key: string, value: string) => {
     const newPreferences = { depth, videoLength, [key]: value };
