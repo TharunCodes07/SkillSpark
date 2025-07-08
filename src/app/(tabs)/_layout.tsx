@@ -1,9 +1,8 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Pressable, View, Text } from "react-native";
-import { useColorScheme } from "@/components/useColorScheme";
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-import Colors from "@/constants/Colors";
+import { useColorScheme } from "~/lib/utils/useColorScheme";
+import { useClientOnlyValue } from "~/components/useClientOnlyValue";
 import { Home, BookOpen, Settings as SettingsIcon } from "lucide-react-native";
 
 function TabBarIcon({
@@ -17,7 +16,7 @@ function TabBarIcon({
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useColorScheme();
 
   return (
     <Tabs
@@ -32,7 +31,7 @@ export default function TabLayout() {
           fontSize: 12,
           fontWeight: "600",
         },
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: colorScheme === "dark" ? "#fff" : "#2f95dc",
         tabBarInactiveTintColor: "#8e8e93",
         headerShown: useClientOnlyValue(false, true),
       }}

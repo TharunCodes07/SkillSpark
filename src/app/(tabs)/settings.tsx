@@ -1,32 +1,17 @@
-import { StyleSheet } from "react-native";
-import { Text, View } from "@/components/Themed";
+import React from "react";
+import { View, ScrollView } from "react-native";
+import NameSetting from "~/components/settings/NameSetting";
+import ThemeSetting from "~/components/settings/ThemeSetting";
+import PreferencesSetting from "~/components/settings/PreferencesSetting";
+import ClearDataSetting from "~/components/settings/ClearDataSetting";
 
-export default function TabTwoScreen() {
+export default function SettingsScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-    </View>
+    <ScrollView className="flex-1 p-4 bg-white dark:bg-black">
+      <NameSetting />
+      <ThemeSetting />
+      <PreferencesSetting />
+      <ClearDataSetting />
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-});
