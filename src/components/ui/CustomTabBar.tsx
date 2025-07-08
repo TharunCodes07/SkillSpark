@@ -21,28 +21,32 @@ export default function CustomTabBar({
   navigation,
 }: CustomTabBarProps) {
   const { isDarkColorScheme } = useColorScheme();
-  const bottomPadding = Platform.OS === "ios" ? 25 : 15;
+  const bottomPadding = Platform.OS === "ios" ? 34 : 20;
 
   return (
     <View
       style={{
         flexDirection: "row",
-        backgroundColor: isDarkColorScheme ? "#0a0a0a" : "#ffffff",
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        paddingHorizontal: 20,
-        paddingTop: 16,
+        backgroundColor: isDarkColorScheme ? "#111111" : "#ffffff",
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        paddingHorizontal: 24,
+        paddingTop: 20,
         paddingBottom: bottomPadding,
         shadowColor: "#000000",
         shadowOffset: {
           width: 0,
-          height: -4,
+          height: -8,
         },
-        shadowOpacity: isDarkColorScheme ? 0.4 : 0.08,
-        shadowRadius: 16,
-        elevation: 20,
-        borderTopWidth: 0.5,
-        borderTopColor: isDarkColorScheme ? "#2a2a2a" : "#f0f0f0",
+        shadowOpacity: isDarkColorScheme ? 0.6 : 0.15,
+        shadowRadius: 24,
+        elevation: 24,
+        borderTopWidth: 1,
+        borderTopColor: isDarkColorScheme ? "#2a2a2a" : "#e5e5e5",
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderLeftColor: isDarkColorScheme ? "#2a2a2a" : "#e5e5e5",
+        borderRightColor: isDarkColorScheme ? "#2a2a2a" : "#e5e5e5",
       }}
     >
       {state.routes.map((route: any, index: number) => {
@@ -74,52 +78,57 @@ export default function CustomTabBar({
               flex: 1,
               alignItems: "center",
               justifyContent: "center",
-              paddingVertical: 12,
-              marginHorizontal: 4,
-              borderRadius: 16,
+              paddingVertical: 14,
+              marginHorizontal: 6,
+              borderRadius: 20,
               backgroundColor: isFocused
                 ? isDarkColorScheme
-                  ? "#1a1a1a"
-                  : "#f8f9fa"
+                  ? "#1e1e1e"
+                  : "#f1f5f9"
                 : "transparent",
+              transform: [{ scale: isFocused ? 1.05 : 1 }],
             }}
             android_ripple={{
-              color: isDarkColorScheme ? "#ffffff20" : "#00000010",
+              color: isDarkColorScheme ? "#ffffff15" : "#00000008",
               borderless: true,
+              radius: 40,
             }}
           >
             <View
               style={{
                 alignItems: "center",
-                transform: [{ scale: isFocused ? 1.1 : 1 }],
+                transform: [
+                  { translateY: isFocused ? -2 : 0 },
+                  { scale: isFocused ? 1.1 : 1 },
+                ],
               }}
             >
               <IconComponent
-                size={isFocused ? 24 : 20}
+                size={isFocused ? 26 : 22}
                 color={
                   isFocused
                     ? isDarkColorScheme
                       ? "#ffffff"
-                      : "#000000"
+                      : "#1e293b"
                     : isDarkColorScheme
-                      ? "#666666"
-                      : "#999999"
+                      ? "#888888"
+                      : "#64748b"
                 }
                 strokeWidth={isFocused ? 2.5 : 2}
               />
               <Text
                 style={{
-                  fontSize: 11,
+                  fontSize: isFocused ? 12 : 11,
                   fontWeight: isFocused ? "700" : "600",
                   color: isFocused
                     ? isDarkColorScheme
                       ? "#ffffff"
-                      : "#000000"
+                      : "#1e293b"
                     : isDarkColorScheme
-                      ? "#666666"
-                      : "#999999",
-                  marginTop: 4,
-                  letterSpacing: 0.3,
+                      ? "#888888"
+                      : "#64748b",
+                  marginTop: 6,
+                  letterSpacing: 0.2,
                 }}
               >
                 {tabItem.label}

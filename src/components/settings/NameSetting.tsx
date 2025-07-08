@@ -4,19 +4,29 @@ import { fetchUserName, setUserName } from "~/queries/user-queries";
 import { Input } from "~/components/ui/input";
 import BottomSheet from "~/components/ui/BottomSheet";
 import Icon from "~/lib/icons/Icon";
+import { useFocusEffect } from "expo-router";
 
 export default function NameSetting() {
   const [name, setName] = useState("");
   const [tempName, setTempName] = useState("");
   const [showBottomSheet, setShowBottomSheet] = useState(false);
 
+  const loadName = async () => {
+    const storedName = await fetchUserName();
+    setName(storedName);
+    setTempName(storedName);
+  };
+
   useEffect(() => {
-    (async () => {
-      const storedName = await fetchUserName();
-      setName(storedName);
-      setTempName(storedName);
-    })();
+    loadName();
   }, []);
+
+  // Refresh data when component comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadName();
+    }, [])
+  );
 
   const handleSave = async () => {
     setName(tempName);

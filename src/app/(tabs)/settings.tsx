@@ -1,5 +1,6 @@
 import React from "react";
-import { View, ScrollView, Text, SafeAreaView } from "react-native";
+import { View, ScrollView, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import NameSetting from "~/components/settings/NameSetting";
 import DescriptionSetting from "~/components/settings/DescriptionSetting";
 import ThemeSetting from "~/components/settings/ThemeSetting";

@@ -7,19 +7,29 @@ import {
 import { Input } from "~/components/ui/input";
 import BottomSheet from "~/components/ui/BottomSheet";
 import Icon from "~/lib/icons/Icon";
+import { useFocusEffect } from "expo-router";
 
 export default function DescriptionSetting() {
   const [description, setDescription] = useState("");
   const [tempDescription, setTempDescription] = useState("");
   const [showBottomSheet, setShowBottomSheet] = useState(false);
 
+  const loadDescription = async () => {
+    const storedDescription = await fetchUserDescription();
+    setDescription(storedDescription);
+    setTempDescription(storedDescription);
+  };
+
   useEffect(() => {
-    (async () => {
-      const storedDescription = await fetchUserDescription();
-      setDescription(storedDescription);
-      setTempDescription(storedDescription);
-    })();
+    loadDescription();
   }, []);
+
+  // Refresh data when component comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadDescription();
+    }, [])
+  );
 
   const handleSave = async () => {
     setDescription(tempDescription);

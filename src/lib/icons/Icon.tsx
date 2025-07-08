@@ -12,7 +12,6 @@ const Icon = ({ name, color, size = 24, ...props }: IconProps) => {
   const { isDarkColorScheme } = useColorScheme();
   const LucideIcon = icons[name];
 
-  // Use professional theme-aware colors
   const iconColor = color || (isDarkColorScheme ? "#f8fafc" : "#1e293b");
 
   return <LucideIcon color={iconColor} size={size} {...props} />;

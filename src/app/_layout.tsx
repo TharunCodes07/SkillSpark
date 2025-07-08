@@ -9,6 +9,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NAV_THEME } from "~/constants/constants";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 
@@ -48,14 +49,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+        <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 
