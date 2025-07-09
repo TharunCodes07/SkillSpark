@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Card } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
+import { useRoadmapData } from "~/lib/utils/RoadmapDataContext";
 import {
   Roadmap,
   getActiveRoadmap,
@@ -17,18 +18,13 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-interface ActiveRoadmapDisplayProps {
-  refreshTrigger?: number;
-  onProgressUpdate?: () => void; // Add callback for progress updates
-}
+interface ActiveRoadmapDisplayProps {}
 
-export default function ActiveRoadmapDisplay({
-  refreshTrigger,
-  onProgressUpdate,
-}: ActiveRoadmapDisplayProps) {
-  const [activeRoadmap, setActiveRoadmap] = useState<Roadmap | null>(null);
+export default function ActiveRoadmapDisplay({}: ActiveRoadmapDisplayProps) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { activeRoadmap, setActiveRoadmap, refreshTrigger, updateStats } =
+    useRoadmapData();
 
   const fadeIn = useSharedValue(0);
   const slideY = useSharedValue(30);
@@ -39,7 +35,7 @@ export default function ActiveRoadmapDisplay({
     loadActiveRoadmap();
   }, [refreshTrigger]);
 
-  const loadActiveRoadmap = async () => {
+  const loadActiveRoadmap = useCallback(async () => {
     try {
       setLoading(true);
       const roadmap = await getActiveRoadmap();
@@ -67,7 +63,7 @@ export default function ActiveRoadmapDisplay({
     } finally {
       setLoading(false);
     }
-  };
+  }, [setActiveRoadmap, fadeIn, slideY, progressWidth]);
 
   const handleToggleCompletion = async (
     pointId: string,
@@ -80,56 +76,55 @@ export default function ActiveRoadmapDisplay({
       await updateRoadmapProgress(activeRoadmap.id, pointId, newStatus);
 
       // Update local state immediately for better UX
-      setActiveRoadmap((prev) => {
-        if (!prev || !Array.isArray(prev.points)) return prev;
+      const updatedPoints = activeRoadmap.points.map((point) =>
+        point.id === pointId ? { ...point, isCompleted: newStatus } : point
+      );
 
-        const updatedPoints = prev.points.map((point) =>
-          point.id === pointId ? { ...point, isCompleted: newStatus } : point
-        );
+      // Recalculate progress
+      const completedPoints = updatedPoints.filter(
+        (point) => point.isCompleted
+      ).length;
+      const totalPoints = updatedPoints.length;
+      const percentage =
+        totalPoints > 0 ? Math.round((completedPoints / totalPoints) * 100) : 0;
 
-        // Recalculate progress
-        const completedPoints = updatedPoints.filter(
-          (point) => point && point.isCompleted
-        ).length;
-        const totalPoints = updatedPoints.length;
-        const percentage =
-          totalPoints > 0
-            ? Math.round((completedPoints / totalPoints) * 100)
-            : 0;
+      const updatedRoadmap = {
+        ...activeRoadmap,
+        points: updatedPoints,
+        progress: {
+          completedPoints,
+          totalPoints,
+          percentage,
+        },
+      };
 
-        const updatedRoadmap = {
-          ...prev,
-          points: updatedPoints,
-          progress: {
-            completedPoints,
-            totalPoints,
-            percentage,
-          },
-        };
+      // Update the context with the new roadmap
+      setActiveRoadmap(updatedRoadmap);
 
-        // Animate progress bar update
-        progressWidth.value = withTiming(percentage, {
-          duration: 1000,
-          easing: Easing.out(Easing.quad),
-        });
+      // Update stats in context as well
+      updateStats((prevStats) => ({
+        ...prevStats,
+        completedPoints: prevStats.completedPoints + (newStatus ? 1 : -1),
+        activeRoadmapProgress: percentage,
+      }));
 
-        // Add bounce animation to progress section
-        progressBounce.value = withSpring(
-          1.05,
-          { damping: 15, stiffness: 200 },
-          () => {
-            progressBounce.value = withSpring(1, {
-              damping: 15,
-              stiffness: 200,
-            });
-          }
-        );
-
-        return updatedRoadmap;
+      // Animate progress bar update
+      progressWidth.value = withTiming(percentage, {
+        duration: 1000,
+        easing: Easing.out(Easing.quad),
       });
 
-      // Notify parent component about progress update
-      onProgressUpdate?.();
+      // Add bounce animation to progress section
+      progressBounce.value = withSpring(
+        1.05,
+        { damping: 15, stiffness: 200 },
+        () => {
+          progressBounce.value = withSpring(1, {
+            damping: 15,
+            stiffness: 200,
+          });
+        }
+      );
     } catch (error) {
       console.error("Error updating progress:", error);
       // Reload data if update fails
@@ -296,14 +291,14 @@ export default function ActiveRoadmapDisplay({
                       e.stopPropagation(); // Prevent triggering parent onPress
                       handlePointPress(point.id);
                     }}
-                    className="w-64 mr-3"
+                    className="w-72 mr-3"
                   >
                     <Card
-                      className={`p-4 border ${point.isCompleted ? "border-green-300 bg-green-50 dark:bg-green-900/20" : "border-border bg-card"} ${point.playlists === null ? "border-dashed border-orange-300" : ""}`}
+                      className={`p-5 border h-48 ${point.isCompleted ? "border-green-300 bg-green-50 dark:bg-green-900/20" : "border-border bg-card"} ${point.playlists === null ? "border-dashed border-orange-300" : ""}`}
                     >
-                      <View className="flex-row items-start justify-between mb-2">
-                        <View className="flex-1">
-                          <View className="flex-row items-center mb-1">
+                      <View className="flex-row items-start justify-between mb-3">
+                        <View className="flex-1 pr-2">
+                          <View className="flex-row items-center mb-2">
                             <Text
                               className={`text-xs font-medium px-2 py-1 rounded-full ${getLevelBgColor(point.level)}`}
                               style={{ color: getLevelColor(point.level) }}
@@ -317,13 +312,16 @@ export default function ActiveRoadmapDisplay({
                               <View className="ml-2 w-2 h-2 bg-orange-400 rounded-full" />
                             )}
                           </View>
-                          <Text className="text-sm font-semibold text-foreground">
+                          <Text
+                            className="text-sm font-semibold text-foreground leading-5"
+                            numberOfLines={2}
+                          >
                             {point.title}
                           </Text>
                         </View>
                         <TouchableOpacity
                           onPress={(e) => {
-                            e.stopPropagation(); // Prevent triggering parent onPress
+                            e.stopPropagation();
                             handleToggleCompletion(
                               point.id,
                               point.isCompleted || false
@@ -341,44 +339,45 @@ export default function ActiveRoadmapDisplay({
                         </TouchableOpacity>
                       </View>
 
-                      <Text
-                        className="text-xs text-muted-foreground mb-3"
-                        numberOfLines={2}
-                      >
-                        {point.description}
-                      </Text>
+                      <View className="flex-1 justify-between">
+                        <Text
+                          className="text-xs text-muted-foreground mb-4 leading-4"
+                          numberOfLines={3}
+                        >
+                          {point.description}
+                        </Text>
 
-                      <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center">
-                          <Icon name="Play" size={12} color="#6b7280" />
-                          <Text className="text-xs text-muted-foreground ml-1">
-                            {point.playlists
-                              ? `${point.playlists.length} videos`
-                              : "Tap to explore"}
-                          </Text>
-                        </View>
-                        <View className="flex-row items-center">
-                          <Text
-                            className={`text-xs font-medium mr-2 ${
-                              point.isCompleted
-                                ? "text-green-600 dark:text-green-400"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {point.isCompleted ? "Completed" : "In Progress"}
-                          </Text>
-                          <Icon name="ChevronRight" size={12} color="#6b7280" />
+                        <View className="space-y-3">
+                          <View className="flex-row items-center">
+                            <Icon name="Play" size={12} color="#6b7280" />
+                            <Text className="text-xs text-muted-foreground ml-2">
+                              {point.playlists
+                                ? `${point.playlists.length} videos`
+                                : "Tap to explore"}
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center justify-between">
+                            <Text
+                              className={`text-xs font-medium ${
+                                point.isCompleted
+                                  ? "text-green-600 dark:text-green-400"
+                                  : "text-muted-foreground"
+                              }`}
+                            ></Text>
+                          </View>
                         </View>
                       </View>
                     </Card>
                   </TouchableOpacity>
                 ))
               ) : (
-                <View className="w-64 mr-3">
-                  <Card className="p-4 border border-border bg-card">
-                    <Text className="text-sm text-muted-foreground text-center">
-                      No learning points available
-                    </Text>
+                <View className="w-72 mr-3">
+                  <Card className="p-5 border border-border bg-card h-48">
+                    <View className="flex-1 items-center justify-center">
+                      <Text className="text-sm text-muted-foreground text-center">
+                        No learning points available
+                      </Text>
+                    </View>
                   </Card>
                 </View>
               )}
@@ -391,7 +390,7 @@ export default function ActiveRoadmapDisplay({
               <View className="flex-row items-center">
                 <Icon name="Calendar" size={16} color="#6b7280" />
                 <Text className="text-xs text-muted-foreground ml-1">
-                  Created{" "}
+                  Created
                   {new Date(activeRoadmap.createdAt).toLocaleDateString()}
                 </Text>
               </View>

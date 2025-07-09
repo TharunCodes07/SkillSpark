@@ -43,7 +43,7 @@ export async function generateRoadmapFromBackend(
 ): Promise<Roadmap> {
   try {
     const response = await fetch(
-      "http://localhost:8001/api/roadmaps/generate",
+      "http://10.12.215.124:8001/api/roadmaps/generate",
       {
         method: "POST",
         headers: {
@@ -363,15 +363,13 @@ export async function generatePlaylistsFromBackend(
 ): Promise<PlaylistItem[]> {
   try {
     const response = await fetch(
-      "http://localhost:8001/api/playlists/generate",
+      "http://10.12.215.124:8001/api/playlists/generate",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          roadmapId,
-          pointId,
           topic,
           pointTitle,
         }),
@@ -423,6 +421,32 @@ export async function loadPlaylistsForPoint(
     return playlists;
   } catch (error) {
     console.error("Error loading playlists for point:", error);
+    throw error;
+  }
+}
+
+// Function to regenerate playlists for a roadmap point (forces new backend call)
+export async function regeneratePlaylistsForPoint(
+  roadmapId: string,
+  pointId: string,
+  topic: string,
+  pointTitle: string
+): Promise<PlaylistItem[]> {
+  try {
+    // Generate new playlists from backend (bypassing cache)
+    const playlists = await generatePlaylistsFromBackend(
+      roadmapId,
+      pointId,
+      topic,
+      pointTitle
+    );
+
+    // Save new playlists to storage (overwriting existing ones)
+    await initializePlaylistsForPoint(roadmapId, pointId, playlists);
+
+    return playlists;
+  } catch (error) {
+    console.error("Error regenerating playlists for point:", error);
     throw error;
   }
 }

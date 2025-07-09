@@ -4,12 +4,16 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
+import { useRoadmapData } from "~/lib/utils/RoadmapDataContext";
+import LoadingSkeleton from "~/components/ui/LoadingSkeleton";
 import { generateNewRoadmap } from "~/queries/roadmap-queries";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSpring,
+  withRepeat,
+  withSequence,
   Easing,
   runOnJS,
 } from "react-native-reanimated";
@@ -24,10 +28,27 @@ export default function RoadmapGenerator({
   const [topic, setTopic] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { isDarkColorScheme } = useColorScheme();
+  const { setActiveRoadmap, refreshData } = useRoadmapData();
 
   const buttonScale = useSharedValue(1);
   const inputFocus = useSharedValue(0);
   const cardScale = useSharedValue(1);
+  const loadingOpacity = useSharedValue(0);
+
+  const startLoadingAnimation = () => {
+    loadingOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.3, { duration: 800 }),
+        withTiming(0.8, { duration: 800 })
+      ),
+      -1,
+      false
+    );
+  };
+
+  const stopLoadingAnimation = () => {
+    loadingOpacity.value = withTiming(0, { duration: 300 });
+  };
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -40,10 +61,14 @@ export default function RoadmapGenerator({
 
     setIsGenerating(true);
     buttonScale.value = withSpring(0.95);
+    startLoadingAnimation();
 
     try {
       // Use the real backend API to generate roadmap
       const roadmap = await generateNewRoadmap(topic.trim());
+
+      // Update the context with the new active roadmap
+      setActiveRoadmap(roadmap);
 
       // Animate success
       cardScale.value = withTiming(1.05, { duration: 200 }, () => {
@@ -59,6 +84,7 @@ export default function RoadmapGenerator({
             onPress: () => {
               setTopic("");
               onRoadmapGenerated?.();
+              refreshData(); // Refresh all data to update stats
             },
           },
         ]
@@ -74,6 +100,7 @@ export default function RoadmapGenerator({
     } finally {
       setIsGenerating(false);
       buttonScale.value = withSpring(1);
+      stopLoadingAnimation();
     }
   };
 
@@ -96,6 +123,10 @@ export default function RoadmapGenerator({
 
   const cardStyle = useAnimatedStyle(() => ({
     transform: [{ scale: cardScale.value }],
+  }));
+
+  const loadingStyle = useAnimatedStyle(() => ({
+    opacity: loadingOpacity.value,
   }));
 
   return (
@@ -153,28 +184,70 @@ export default function RoadmapGenerator({
           </View>
 
           <Animated.View style={buttonStyle}>
-            <Button
-              onPress={handleGenerate}
-              disabled={isGenerating || !topic.trim()}
-              style={{
-                backgroundColor: isGenerating ? "#9CA3AF" : "#4F46E5",
-                paddingVertical: 16,
-                borderRadius: 12,
-                width: "100%",
-              }}
-            >
-              <View className="flex-row items-center justify-center">
-                {isGenerating && (
-                  <View className="mr-2">
-                    <Icon name="Loader" size={20} color="#ffffff" />
-                  </View>
-                )}
-                <Text className="text-white font-semibold text-base">
-                  <Icon name="Wand" size={20} color="#ffffff" />
-                  {isGenerating ? "Generating..." : "Generate Roadmap"}
+            {isGenerating ? (
+              <View
+                style={{
+                  backgroundColor: isDarkColorScheme ? "#4B5563" : "#E5E7EB",
+                  paddingVertical: 16,
+                  borderRadius: 12,
+                  width: "100%",
+                }}
+                className="flex-row items-center justify-center"
+              >
+                <Text
+                  style={{
+                    color: isDarkColorScheme ? "#9CA3AF" : "#6B7280",
+                    fontSize: 16,
+                    fontWeight: "600",
+                  }}
+                >
+                  Generating...
                 </Text>
               </View>
-            </Button>
+            ) : (
+              <Button
+                onPress={handleGenerate}
+                disabled={!topic.trim()}
+                style={{
+                  backgroundColor: topic.trim()
+                    ? "#4F46E5"
+                    : isDarkColorScheme
+                      ? "#374151"
+                      : "#D1D5DB",
+                  paddingVertical: 16,
+                  borderRadius: 12,
+                  width: "100%",
+                }}
+              >
+                <View className="flex-row items-center justify-center">
+                  <Icon
+                    name="Wand"
+                    size={20}
+                    color={
+                      topic.trim()
+                        ? "#ffffff"
+                        : isDarkColorScheme
+                          ? "#9CA3AF"
+                          : "#6B7280"
+                    }
+                  />
+                  <Text
+                    style={{
+                      color: topic.trim()
+                        ? "#ffffff"
+                        : isDarkColorScheme
+                          ? "#9CA3AF"
+                          : "#6B7280",
+                      fontWeight: "600",
+                      fontSize: 16,
+                      marginLeft: 8,
+                    }}
+                  >
+                    Generate Roadmap
+                  </Text>
+                </View>
+              </Button>
+            )}
           </Animated.View>
         </View>
 
