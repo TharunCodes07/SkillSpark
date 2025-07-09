@@ -6,6 +6,7 @@ import Icon from "~/lib/icons/Icon";
 import { useRoadmapData } from "~/lib/utils/RoadmapDataContext";
 import {
   Roadmap,
+  RoadmapPoint,
   getActiveRoadmap,
   updateRoadmapProgress,
 } from "~/queries/roadmap-queries";
@@ -18,13 +19,18 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-interface ActiveRoadmapDisplayProps {}
+interface ActiveRoadmapDisplayProps {
+  refreshTrigger?: number;
+  onProgressUpdate?: () => void;
+}
 
-export default function ActiveRoadmapDisplay({}: ActiveRoadmapDisplayProps) {
+export default function ActiveRoadmapDisplay({
+  refreshTrigger: propRefreshTrigger,
+  onProgressUpdate,
+}: ActiveRoadmapDisplayProps) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { activeRoadmap, setActiveRoadmap, refreshTrigger, updateStats } =
-    useRoadmapData();
+  const { activeRoadmap, setActiveRoadmap, refreshTrigger } = useRoadmapData();
 
   const fadeIn = useSharedValue(0);
   const slideY = useSharedValue(30);
@@ -76,13 +82,13 @@ export default function ActiveRoadmapDisplay({}: ActiveRoadmapDisplayProps) {
       await updateRoadmapProgress(activeRoadmap.id, pointId, newStatus);
 
       // Update local state immediately for better UX
-      const updatedPoints = activeRoadmap.points.map((point) =>
+      const updatedPoints = activeRoadmap.points.map((point: RoadmapPoint) =>
         point.id === pointId ? { ...point, isCompleted: newStatus } : point
       );
 
       // Recalculate progress
       const completedPoints = updatedPoints.filter(
-        (point) => point.isCompleted
+        (point: RoadmapPoint) => point.isCompleted
       ).length;
       const totalPoints = updatedPoints.length;
       const percentage =
@@ -101,12 +107,10 @@ export default function ActiveRoadmapDisplay({}: ActiveRoadmapDisplayProps) {
       // Update the context with the new roadmap
       setActiveRoadmap(updatedRoadmap);
 
-      // Update stats in context as well
-      updateStats((prevStats) => ({
-        ...prevStats,
-        completedPoints: prevStats.completedPoints + (newStatus ? 1 : -1),
-        activeRoadmapProgress: percentage,
-      }));
+      // Trigger progress update callback if provided
+      if (onProgressUpdate) {
+        onProgressUpdate();
+      }
 
       // Animate progress bar update
       progressWidth.value = withTiming(percentage, {
@@ -284,92 +288,94 @@ export default function ActiveRoadmapDisplay({}: ActiveRoadmapDisplayProps) {
               className="space-x-3"
             >
               {activeRoadmap.points && Array.isArray(activeRoadmap.points) ? (
-                activeRoadmap.points.map((point, index) => (
-                  <TouchableOpacity
-                    key={point.id}
-                    onPress={(e) => {
-                      e.stopPropagation(); // Prevent triggering parent onPress
-                      handlePointPress(point.id);
-                    }}
-                    className="w-72 mr-3"
-                  >
-                    <Card
-                      className={`p-5 border h-48 ${point.isCompleted ? "border-green-300 bg-green-50 dark:bg-green-900/20" : "border-border bg-card"} ${point.playlists === null ? "border-dashed border-orange-300" : ""}`}
+                activeRoadmap.points.map(
+                  (point: RoadmapPoint, index: number) => (
+                    <TouchableOpacity
+                      key={point.id}
+                      onPress={(e) => {
+                        e.stopPropagation(); // Prevent triggering parent onPress
+                        handlePointPress(point.id);
+                      }}
+                      className="w-72 mr-3"
                     >
-                      <View className="flex-row items-start justify-between mb-3">
-                        <View className="flex-1 pr-2">
-                          <View className="flex-row items-center mb-2">
+                      <Card
+                        className={`p-5 border h-48 ${point.isCompleted ? "border-green-300 bg-green-50 dark:bg-green-900/20" : "border-border bg-card"} ${point.playlists === null ? "border-dashed border-orange-300" : ""}`}
+                      >
+                        <View className="flex-row items-start justify-between mb-3">
+                          <View className="flex-1 pr-2">
+                            <View className="flex-row items-center mb-2">
+                              <Text
+                                className={`text-xs font-medium px-2 py-1 rounded-full ${getLevelBgColor(point.level)}`}
+                                style={{ color: getLevelColor(point.level) }}
+                              >
+                                {point.level.toUpperCase()}
+                              </Text>
+                              <Text className="text-xs text-muted-foreground ml-2">
+                                Step {point.order}
+                              </Text>
+                              {point.playlists === null && (
+                                <View className="ml-2 w-2 h-2 bg-orange-400 rounded-full" />
+                              )}
+                            </View>
                             <Text
-                              className={`text-xs font-medium px-2 py-1 rounded-full ${getLevelBgColor(point.level)}`}
-                              style={{ color: getLevelColor(point.level) }}
+                              className="text-sm font-semibold text-foreground leading-5"
+                              numberOfLines={2}
                             >
-                              {point.level.toUpperCase()}
+                              {point.title}
                             </Text>
-                            <Text className="text-xs text-muted-foreground ml-2">
-                              Step {point.order}
-                            </Text>
-                            {point.playlists === null && (
-                              <View className="ml-2 w-2 h-2 bg-orange-400 rounded-full" />
-                            )}
                           </View>
-                          <Text
-                            className="text-sm font-semibold text-foreground leading-5"
-                            numberOfLines={2}
+                          <TouchableOpacity
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              handleToggleCompletion(
+                                point.id,
+                                point.isCompleted || false
+                              );
+                            }}
+                            className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                              point.isCompleted
+                                ? "border-green-500 bg-green-500"
+                                : "border-gray-300 dark:border-gray-600"
+                            }`}
                           >
-                            {point.title}
+                            {point.isCompleted && (
+                              <Icon name="Check" size={12} color="#ffffff" />
+                            )}
+                          </TouchableOpacity>
+                        </View>
+
+                        <View className="flex-1 justify-between">
+                          <Text
+                            className="text-xs text-muted-foreground mb-4 leading-4"
+                            numberOfLines={3}
+                          >
+                            {point.description}
                           </Text>
-                        </View>
-                        <TouchableOpacity
-                          onPress={(e) => {
-                            e.stopPropagation();
-                            handleToggleCompletion(
-                              point.id,
-                              point.isCompleted || false
-                            );
-                          }}
-                          className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-                            point.isCompleted
-                              ? "border-green-500 bg-green-500"
-                              : "border-gray-300 dark:border-gray-600"
-                          }`}
-                        >
-                          {point.isCompleted && (
-                            <Icon name="Check" size={12} color="#ffffff" />
-                          )}
-                        </TouchableOpacity>
-                      </View>
 
-                      <View className="flex-1 justify-between">
-                        <Text
-                          className="text-xs text-muted-foreground mb-4 leading-4"
-                          numberOfLines={3}
-                        >
-                          {point.description}
-                        </Text>
-
-                        <View className="space-y-3">
-                          <View className="flex-row items-center">
-                            <Icon name="Play" size={12} color="#6b7280" />
-                            <Text className="text-xs text-muted-foreground ml-2">
-                              {point.playlists
-                                ? `${point.playlists.length} videos`
-                                : "Tap to explore"}
-                            </Text>
-                          </View>
-                          <View className="flex-row items-center justify-between">
-                            <Text
-                              className={`text-xs font-medium ${
-                                point.isCompleted
-                                  ? "text-green-600 dark:text-green-400"
-                                  : "text-muted-foreground"
-                              }`}
-                            ></Text>
+                          <View className="space-y-3">
+                            <View className="flex-row items-center">
+                              <Icon name="Play" size={12} color="#6b7280" />
+                              <Text className="text-xs text-muted-foreground ml-2">
+                                {point.playlists
+                                  ? `${point.playlists.length} videos`
+                                  : "Tap to explore"}
+                              </Text>
+                            </View>
+                            <View className="flex-row items-center justify-between">
+                              <Text
+                                className={`text-xs font-medium ${
+                                  point.isCompleted
+                                    ? "text-green-600 dark:text-green-400"
+                                    : "text-muted-foreground"
+                                }`}
+                              ></Text>
+                            </View>
                           </View>
                         </View>
-                      </View>
-                    </Card>
-                  </TouchableOpacity>
-                ))
+                      </Card>
+                    </TouchableOpacity>
+                  )
+                )
               ) : (
                 <View className="w-72 mr-3">
                   <Card className="p-5 border border-border bg-card h-48">

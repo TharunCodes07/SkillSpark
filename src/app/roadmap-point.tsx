@@ -12,8 +12,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
-import YouTubeIcon from "~/lib/icons/YouTube";
-import Spinner from "~/components/ui/spinner";
+import { YouTubeIcon } from "~/lib/icons/YouTube";
+import { Spinner } from "~/components/ui/spinner";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 import {
   getRoadmapById,

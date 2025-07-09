@@ -5,7 +5,6 @@ import { Card } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 import { useRoadmapData } from "~/lib/utils/RoadmapDataContext";
-import LoadingSkeleton from "~/components/ui/LoadingSkeleton";
 import { generateNewRoadmap } from "~/queries/roadmap-queries";
 import Animated, {
   useSharedValue,
