@@ -5,6 +5,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { getAllRoadmaps, Roadmap } from "~/queries/roadmap-queries";
 import RoadmapCard from "~/components/skills/RoadmapCard";
 import SearchBar from "~/components/skills/SearchBar";
+import { Button } from "~/components/ui/button";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -60,7 +61,6 @@ export default function SkillsScreen() {
     }
   };
 
-  // Filter roadmaps based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredRoadmaps(roadmaps);
@@ -130,12 +130,11 @@ export default function SkillsScreen() {
             : "Start by generating your first learning roadmap from the Home tab"}
         </Text>
         {!isSearching && (
-          <View
-            className="px-6 py-3 bg-primary rounded-lg"
-            onTouchEnd={() => router.push("/(tabs)/")}
-          >
-            <Text className="text-white font-semibold">Go to Home</Text>
-          </View>
+          <Button onPress={() => router.push("/(tabs)/")} className="mx-8">
+            <Text className="text-primary-foreground font-semibold">
+              Go to Home
+            </Text>
+          </Button>
         )}
       </View>
     );

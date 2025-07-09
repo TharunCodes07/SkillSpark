@@ -1,8 +1,10 @@
 # Backend API Specification for SkillTrail
 
-## 1. Generate Roadmap API
+## 1. Generate Roadmap API ✅ IMPLEMENTED
 
 ### Endpoint: `POST /api/roadmaps/generate`
+
+**Base URL:** `http://localhost:8001`
 
 ### Request:
 
@@ -71,9 +73,11 @@
 }
 ```
 
-## 2. Generate Playlists API
+## 2. Generate Playlists API ✅ IMPLEMENTED
 
 ### Endpoint: `POST /api/playlists/generate`
+
+**Base URL:** `http://localhost:8001`
 
 ### Request:
 
@@ -201,15 +205,27 @@ interface Roadmap {
 
 ## 6. Integration Points
 
-### Frontend Integration:
+### Frontend Integration Status:
 
-1. Call `generateRoadmapFromBackend()` when user submits topic
-2. Store returned roadmap using `setActiveRoadmap()`
-3. When user clicks on roadmap point, call `loadPlaylistsForPoint()`
-4. Update the point's playlists using `initializePlaylistsForPoint()`
+1. ✅ `generateNewRoadmap()` calls `generateRoadmapFromBackend()` when user submits topic
+2. ✅ Returned roadmap is stored using `setActiveRoadmap()`
+3. ✅ When user clicks on roadmap point, `loadPlaylistsForPoint()` is called
+4. ✅ Point playlists are updated using `initializePlaylistsForPoint()`
 
-### Frontend Functions to Replace:
+### API Endpoints in Use:
 
-- Replace `generateRoadmapFromBackend()` with actual API call
-- Replace `generatePlaylistsFromBackend()` with actual API call
-- Both functions should handle the API responses and errors appropriately
+- **Roadmap Generation:** `POST http://localhost:8001/api/roadmaps/generate`
+- **Playlist Generation:** `POST http://localhost:8001/api/playlists/generate`
+
+### Components Updated:
+
+- ✅ `RoadmapGenerator.tsx` - Uses real backend for roadmap generation
+- ✅ `roadmap-point.tsx` - Uses real backend for playlist loading
+- ✅ All error handling and loading states implemented
+
+### Frontend Functions Updated:
+
+- ✅ `generateRoadmapFromBackend()` - Now calls real API at `http://localhost:8001/api/roadmaps/generate`
+- ✅ `generatePlaylistsFromBackend()` - Now calls real API at `http://localhost:8001/api/playlists/generate`
+- ✅ All components updated to use real backend instead of mock data
+- ✅ Error handling implemented for API failures

@@ -189,14 +189,16 @@ export default function RoadmapDetailScreen() {
           </Text>
 
           {roadmap.points?.map((point, index) => (
-            <RoadmapPointCard
-              key={point.id}
-              point={point}
-              index={index}
-              onPress={() => handlePointPress(point)}
-              onToggleComplete={() => handleToggleComplete(point)}
-              delay={index * 100}
-            />
+            <View key={point.id} className="mb-4">
+              <RoadmapPointCard
+                key={point.id}
+                point={point}
+                index={index}
+                onPress={() => handlePointPress(point)}
+                onToggleComplete={() => handleToggleComplete(point)}
+                delay={index * 100}
+              />
+            </View>
           ))}
         </View>
 

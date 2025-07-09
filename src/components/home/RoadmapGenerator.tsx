@@ -4,11 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
-import {
-  generateNewRoadmap,
-  createMockRoadmap,
-  setActiveRoadmap,
-} from "~/queries/roadmap-queries";
+import { generateNewRoadmap } from "~/queries/roadmap-queries";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -46,10 +42,8 @@ export default function RoadmapGenerator({
     buttonScale.value = withSpring(0.95);
 
     try {
-      // Since backend is not ready, use mock data
-      // Replace this with: await generateNewRoadmap(topic.trim());
-      const mockRoadmap = createMockRoadmap(topic.trim());
-      await setActiveRoadmap(mockRoadmap);
+      // Use the real backend API to generate roadmap
+      const roadmap = await generateNewRoadmap(topic.trim());
 
       // Animate success
       cardScale.value = withTiming(1.05, { duration: 200 }, () => {
@@ -70,7 +64,12 @@ export default function RoadmapGenerator({
         ]
       );
     } catch (error) {
-      Alert.alert("Error", "Failed to generate roadmap. Please try again.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      Alert.alert(
+        "Error",
+        `Failed to generate roadmap: ${errorMessage}. Please try again.`
+      );
       console.error("Error generating roadmap:", error);
     } finally {
       setIsGenerating(false);

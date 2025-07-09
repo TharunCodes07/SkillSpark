@@ -149,6 +149,15 @@ export default function ActiveRoadmapDisplay({
     });
   };
 
+  const handleRoadmapPress = () => {
+    if (!activeRoadmap) return;
+
+    router.push({
+      pathname: "/roadmap-detail",
+      params: { roadmapId: activeRoadmap.id },
+    });
+  };
+
   const containerStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
     transform: [{ translateY: slideY.value }],
@@ -225,162 +234,177 @@ export default function ActiveRoadmapDisplay({
 
   return (
     <Animated.View style={containerStyle} className="mx-6 mb-6">
-      <Card className="p-6 bg-card border border-border ml-4 mr-4">
-        {/* Header */}
-        <View className="flex-row items-center justify-between mb-4">
-          <View className="flex-1">
-            <Text className="text-xl font-bold text-foreground">
-              {activeRoadmap.title}
-            </Text>
-            <Text className="text-sm text-muted-foreground mt-1">
-              {activeRoadmap.description}
-            </Text>
-          </View>
-          <View className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-full items-center justify-center">
-            <Icon name="BookOpen" size={20} color="#6366f1" />
-          </View>
-        </View>
-
-        {/* Progress Section */}
-        <Animated.View style={progressSectionStyle} className="mb-6">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-sm font-medium text-foreground">
-              Overall Progress
-            </Text>
-            <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-              {activeRoadmap.progress?.percentage || 0}%
-            </Text>
-          </View>
-
-          <View className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <Animated.View
-              style={progressBarStyle}
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
-            />
-          </View>
-
-          <Text className="text-xs text-muted-foreground mt-1">
-            {activeRoadmap.progress?.completedPoints || 0} of{" "}
-            {activeRoadmap.progress?.totalPoints || 0} sections completed
-          </Text>
-        </Animated.View>
-
-        {/* Learning Points */}
-        <View>
-          <Text className="text-lg font-semibold text-foreground mb-3">
-            Learning Path
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="space-x-3"
-          >
-            {activeRoadmap.points && Array.isArray(activeRoadmap.points) ? (
-              activeRoadmap.points.map((point, index) => (
-                <TouchableOpacity
-                  key={point.id}
-                  onPress={() => handlePointPress(point.id)}
-                  className="w-64 mr-3"
-                >
-                  <Card
-                    className={`p-4 border ${point.isCompleted ? "border-green-300 bg-green-50 dark:bg-green-900/20" : "border-border bg-card"} ${point.playlists === null ? "border-dashed border-orange-300" : ""}`}
-                  >
-                    <View className="flex-row items-start justify-between mb-2">
-                      <View className="flex-1">
-                        <View className="flex-row items-center mb-1">
-                          <Text
-                            className={`text-xs font-medium px-2 py-1 rounded-full ${getLevelBgColor(point.level)}`}
-                            style={{ color: getLevelColor(point.level) }}
-                          >
-                            {point.level.toUpperCase()}
-                          </Text>
-                          <Text className="text-xs text-muted-foreground ml-2">
-                            Step {point.order}
-                          </Text>
-                          {point.playlists === null && (
-                            <View className="ml-2 w-2 h-2 bg-orange-400 rounded-full" />
-                          )}
-                        </View>
-                        <Text className="text-sm font-semibold text-foreground">
-                          {point.title}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={(e) => {
-                          e.stopPropagation(); // Prevent triggering parent onPress
-                          handleToggleCompletion(
-                            point.id,
-                            point.isCompleted || false
-                          );
-                        }}
-                        className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-                          point.isCompleted
-                            ? "border-green-500 bg-green-500"
-                            : "border-gray-300 dark:border-gray-600"
-                        }`}
-                      >
-                        {point.isCompleted && (
-                          <Icon name="Check" size={12} color="#ffffff" />
-                        )}
-                      </TouchableOpacity>
-                    </View>
-
-                    <Text
-                      className="text-xs text-muted-foreground mb-3"
-                      numberOfLines={2}
-                    >
-                      {point.description}
-                    </Text>
-
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-row items-center">
-                        <Icon name="Play" size={12} color="#6b7280" />
-                        <Text className="text-xs text-muted-foreground ml-1">
-                          {point.playlists
-                            ? `${point.playlists.length} videos`
-                            : "Tap to explore"}
-                        </Text>
-                      </View>
-                      <View className="flex-row items-center">
-                        <Text
-                          className={`text-xs font-medium mr-2 ${
-                            point.isCompleted
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {point.isCompleted ? "Completed" : "In Progress"}
-                        </Text>
-                        <Icon name="ChevronRight" size={12} color="#6b7280" />
-                      </View>
-                    </View>
-                  </Card>
-                </TouchableOpacity>
-              ))
-            ) : (
-              <View className="w-64 mr-3">
-                <Card className="p-4 border border-border bg-card">
-                  <Text className="text-sm text-muted-foreground text-center">
-                    No learning points available
-                  </Text>
-                </Card>
-              </View>
-            )}
-          </ScrollView>
-        </View>
-
-        {/* Footer */}
-        <View className="mt-6 pt-4 border-t border-border">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
-              <Icon name="Calendar" size={16} color="#6b7280" />
-              <Text className="text-xs text-muted-foreground ml-1">
-                Created {new Date(activeRoadmap.createdAt).toLocaleDateString()}
+      <TouchableOpacity onPress={handleRoadmapPress} activeOpacity={0.9}>
+        <Card className="p-6 bg-card border border-border ml-4 mr-4">
+          {/* Header */}
+          <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-1">
+              <Text className="text-xl font-bold text-foreground">
+                {activeRoadmap.title}
+              </Text>
+              <Text className="text-sm text-muted-foreground mt-1">
+                {activeRoadmap.description}
               </Text>
             </View>
+            <View className="flex-row items-center">
+              <View className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-full items-center justify-center mr-2">
+                <Icon name="BookOpen" size={20} color="#6366f1" />
+              </View>
+              <Icon name="ChevronRight" size={20} color="#6366f1" />
+            </View>
           </View>
-        </View>
-      </Card>
+
+          {/* Progress Section */}
+          <Animated.View style={progressSectionStyle} className="mb-6">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-sm font-medium text-foreground">
+                Overall Progress
+              </Text>
+              <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                {activeRoadmap.progress?.percentage || 0}%
+              </Text>
+            </View>
+
+            <View className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <Animated.View
+                style={progressBarStyle}
+                className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
+              />
+            </View>
+
+            <Text className="text-xs text-muted-foreground mt-1">
+              {activeRoadmap.progress?.completedPoints || 0} of{" "}
+              {activeRoadmap.progress?.totalPoints || 0} sections completed
+            </Text>
+          </Animated.View>
+
+          {/* Learning Points */}
+          <View>
+            <Text className="text-lg font-semibold text-foreground mb-3">
+              Learning Path
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="space-x-3"
+            >
+              {activeRoadmap.points && Array.isArray(activeRoadmap.points) ? (
+                activeRoadmap.points.map((point, index) => (
+                  <TouchableOpacity
+                    key={point.id}
+                    onPress={(e) => {
+                      e.stopPropagation(); // Prevent triggering parent onPress
+                      handlePointPress(point.id);
+                    }}
+                    className="w-64 mr-3"
+                  >
+                    <Card
+                      className={`p-4 border ${point.isCompleted ? "border-green-300 bg-green-50 dark:bg-green-900/20" : "border-border bg-card"} ${point.playlists === null ? "border-dashed border-orange-300" : ""}`}
+                    >
+                      <View className="flex-row items-start justify-between mb-2">
+                        <View className="flex-1">
+                          <View className="flex-row items-center mb-1">
+                            <Text
+                              className={`text-xs font-medium px-2 py-1 rounded-full ${getLevelBgColor(point.level)}`}
+                              style={{ color: getLevelColor(point.level) }}
+                            >
+                              {point.level.toUpperCase()}
+                            </Text>
+                            <Text className="text-xs text-muted-foreground ml-2">
+                              Step {point.order}
+                            </Text>
+                            {point.playlists === null && (
+                              <View className="ml-2 w-2 h-2 bg-orange-400 rounded-full" />
+                            )}
+                          </View>
+                          <Text className="text-sm font-semibold text-foreground">
+                            {point.title}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={(e) => {
+                            e.stopPropagation(); // Prevent triggering parent onPress
+                            handleToggleCompletion(
+                              point.id,
+                              point.isCompleted || false
+                            );
+                          }}
+                          className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                            point.isCompleted
+                              ? "border-green-500 bg-green-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                        >
+                          {point.isCompleted && (
+                            <Icon name="Check" size={12} color="#ffffff" />
+                          )}
+                        </TouchableOpacity>
+                      </View>
+
+                      <Text
+                        className="text-xs text-muted-foreground mb-3"
+                        numberOfLines={2}
+                      >
+                        {point.description}
+                      </Text>
+
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center">
+                          <Icon name="Play" size={12} color="#6b7280" />
+                          <Text className="text-xs text-muted-foreground ml-1">
+                            {point.playlists
+                              ? `${point.playlists.length} videos`
+                              : "Tap to explore"}
+                          </Text>
+                        </View>
+                        <View className="flex-row items-center">
+                          <Text
+                            className={`text-xs font-medium mr-2 ${
+                              point.isCompleted
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {point.isCompleted ? "Completed" : "In Progress"}
+                          </Text>
+                          <Icon name="ChevronRight" size={12} color="#6b7280" />
+                        </View>
+                      </View>
+                    </Card>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View className="w-64 mr-3">
+                  <Card className="p-4 border border-border bg-card">
+                    <Text className="text-sm text-muted-foreground text-center">
+                      No learning points available
+                    </Text>
+                  </Card>
+                </View>
+              )}
+            </ScrollView>
+          </View>
+
+          {/* Footer */}
+          <View className="mt-6 pt-4 border-t border-border">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <Icon name="Calendar" size={16} color="#6b7280" />
+                <Text className="text-xs text-muted-foreground ml-1">
+                  Created{" "}
+                  {new Date(activeRoadmap.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <Text className="text-xs text-primary font-medium mr-1">
+                  View All Details
+                </Text>
+                <Icon name="ArrowRight" size={14} color="#6366f1" />
+              </View>
+            </View>
+          </View>
+        </Card>
+      </TouchableOpacity>
     </Animated.View>
   );
 }

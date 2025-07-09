@@ -41,10 +41,33 @@ export interface Roadmap {
 export async function generateRoadmapFromBackend(
   topic: string
 ): Promise<Roadmap> {
-  // TODO: Replace with actual API call
+  try {
+    const response = await fetch(
+      "http://localhost:8001/api/roadmaps/generate",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topic }),
+      }
+    );
 
-  // For now, return a mock structure
-  throw new Error("Backend API not implemented yet");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error?.message || "Failed to generate roadmap");
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error("Error generating roadmap from backend:", error);
+    throw error;
+  }
 }
 
 // Storage functions
@@ -338,29 +361,38 @@ export async function generatePlaylistsFromBackend(
   topic: string,
   pointTitle: string
 ): Promise<PlaylistItem[]> {
-  // TODO: Replace with actual API call
-  // Expected backend response format:
-  /* 
-  [
-    {
-      id: "playlist_1",
-      title: "JavaScript Crash Course",
-      videoUrl: "https://youtube.com/watch?v=example1",
-      duration: "2:30:45",
-      description: "Complete JavaScript tutorial for beginners"
-    },
-    {
-      id: "playlist_2",
-      title: "Advanced JavaScript Concepts",
-      videoUrl: "https://youtube.com/watch?v=example2",
-      duration: "1:45:30",
-      description: "Learn advanced JS concepts like closures, prototypes"
-    }
-  ]
-  */
+  try {
+    const response = await fetch(
+      "http://localhost:8001/api/playlists/generate",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          roadmapId,
+          pointId,
+          topic,
+          pointTitle,
+        }),
+      }
+    );
 
-  // For now, return a mock structure
-  throw new Error("Backend API for playlist generation not implemented yet");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error?.message || "Failed to generate playlists");
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error("Error generating playlists from backend:", error);
+    throw error;
+  }
 }
 
 // Function to load playlists for a roadmap point (calls backend and saves to storage)
@@ -398,7 +430,7 @@ export async function loadPlaylistsForPoint(
 // Utility functions
 export async function generateNewRoadmap(topic: string): Promise<Roadmap> {
   try {
-    // This will call the backend API when it's ready
+    // Call the backend API to generate the roadmap
     const roadmap = await generateRoadmapFromBackend(topic);
 
     // Set as active and save

@@ -101,13 +101,14 @@ export default function RoadmapPointScreen() {
       if (areLoaded && pointData.playlists) {
         setPlaylists(pointData.playlists);
       } else {
-        // For now, since backend is not ready, create mock playlists
-        const mockPlaylists = createMockPlaylists(pointData.title, topic);
-        setPlaylists(mockPlaylists);
-
-        // You would replace this with:
-        // const loadedPlaylists = await loadPlaylistsForPoint(roadmapId, pointId, topic, pointData.title);
-        // setPlaylists(loadedPlaylists);
+        // Load playlists from backend
+        const loadedPlaylists = await loadPlaylistsForPoint(
+          roadmapId,
+          pointId,
+          topic,
+          pointData.title
+        );
+        setPlaylists(loadedPlaylists);
       }
     } catch (error) {
       console.error("Error loading playlists:", error);
@@ -115,35 +116,6 @@ export default function RoadmapPointScreen() {
     } finally {
       setLoadingPlaylists(false);
     }
-  };
-
-  const createMockPlaylists = (
-    pointTitle: string,
-    topic: string
-  ): PlaylistItem[] => {
-    return [
-      {
-        id: `mock_${Date.now()}_1`,
-        title: `${pointTitle} - Introduction`,
-        videoUrl: "https://youtube.com/watch?v=example1",
-        duration: "15:30",
-        description: `Learn the basics of ${pointTitle.toLowerCase()}`,
-      },
-      {
-        id: `mock_${Date.now()}_2`,
-        title: `${pointTitle} - Deep Dive`,
-        videoUrl: "https://youtube.com/watch?v=example2",
-        duration: "25:45",
-        description: `Advanced concepts in ${pointTitle.toLowerCase()}`,
-      },
-      {
-        id: `mock_${Date.now()}_3`,
-        title: `${pointTitle} - Practice`,
-        videoUrl: "https://youtube.com/watch?v=example3",
-        duration: "30:20",
-        description: `Hands-on practice with ${pointTitle.toLowerCase()}`,
-      },
-    ];
   };
 
   const handleToggleCompletion = async () => {
