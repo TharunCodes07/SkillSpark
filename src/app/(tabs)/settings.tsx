@@ -6,7 +6,6 @@ import DescriptionSetting from "~/components/settings/DescriptionSetting";
 import ThemeSetting from "~/components/settings/ThemeSetting";
 import PreferencesSetting from "~/components/settings/PreferencesSetting";
 import ClearDataSetting from "~/components/settings/ClearDataSetting";
-import AppInfoSetting from "~/components/settings/AppInfoSetting";
 import SectionHeader from "~/components/ui/SectionHeader";
 import { DataRefreshProvider } from "~/lib/utils/DataRefreshContext";
 

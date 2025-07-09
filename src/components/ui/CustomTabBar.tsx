@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Pressable, Text, Platform } from "react-native";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
-import { Home, BookOpen, Settings as SettingsIcon } from "lucide-react-native";
+import { Home, Rocket, Settings as SettingsIcon } from "lucide-react-native";
 
 interface CustomTabBarProps {
   state: any;
@@ -11,7 +11,7 @@ interface CustomTabBarProps {
 
 const tabItems = [
   { name: "index", label: "Home", icon: Home },
-  { name: "skills", label: "Skills", icon: BookOpen },
+  { name: "skills", label: "Skills", icon: Rocket },
   { name: "settings", label: "Settings", icon: SettingsIcon },
 ];
 

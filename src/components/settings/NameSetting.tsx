@@ -70,6 +70,7 @@ export default function NameSetting() {
           </Text>
           <Input
             value={tempName}
+            
             onChangeText={setTempName}
             placeholder="Enter your full name"
             className="mb-6"

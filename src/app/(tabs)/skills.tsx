@@ -1,28 +1,203 @@
-import { StyleSheet, Text, View } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, Text, FlatList, RefreshControl, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, useFocusEffect } from "expo-router";
+import { getAllRoadmaps, Roadmap } from "~/queries/roadmap-queries";
+import RoadmapCard from "~/components/skills/RoadmapCard";
+import SearchBar from "~/components/skills/SearchBar";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+} from "react-native-reanimated";
 
-export default function TabTwoScreen() {
+export default function SkillsScreen() {
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+  const [filteredRoadmaps, setFilteredRoadmaps] = useState<Roadmap[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // Animation values
+  const headerOpacity = useSharedValue(0);
+  const headerTranslateY = useSharedValue(30);
+
+  useEffect(() => {
+    // Animate header on mount
+    const timer = setTimeout(() => {
+      headerOpacity.value = withTiming(1, { duration: 600 });
+      headerTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Load roadmaps when screen focuses
+  useFocusEffect(
+    useCallback(() => {
+      loadRoadmaps();
+    }, [])
+  );
+
+  const loadRoadmaps = async () => {
+    try {
+      setLoading(true);
+      const allRoadmaps = await getAllRoadmaps();
+      // Sort by creation date (newest first)
+      const sortedRoadmaps = allRoadmaps.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setRoadmaps(sortedRoadmaps);
+      setFilteredRoadmaps(sortedRoadmaps);
+    } catch (error) {
+      console.error("Error loading roadmaps:", error);
+      Alert.alert("Error", "Failed to load your roadmaps");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter roadmaps based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredRoadmaps(roadmaps);
+    } else {
+      const query = searchQuery.toLowerCase().trim();
+      const filtered = roadmaps.filter(
+        (roadmap) =>
+          roadmap.topic.toLowerCase().includes(query) ||
+          roadmap.title.toLowerCase().includes(query) ||
+          roadmap.description.toLowerCase().includes(query) ||
+          roadmap.points.some(
+            (point) =>
+              point.title.toLowerCase().includes(query) ||
+              point.description.toLowerCase().includes(query)
+          )
+      );
+      setFilteredRoadmaps(filtered);
+    }
+  }, [searchQuery, roadmaps]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadRoadmaps();
+    setRefreshing(false);
+  }, []);
+
+  const handleRoadmapPress = (roadmap: Roadmap) => {
+    router.push({
+      pathname: "/roadmap-detail",
+      params: { roadmapId: roadmap.id },
+    });
+  };
+
+  const headerStyle = useAnimatedStyle(() => ({
+    opacity: headerOpacity.value,
+    transform: [{ translateY: headerTranslateY.value }],
+  }));
+
+  const renderRoadmapCard = ({
+    item,
+    index,
+  }: {
+    item: Roadmap;
+    index: number;
+  }) => (
+    <RoadmapCard
+      roadmap={item}
+      onPress={() => handleRoadmapPress(item)}
+      delay={index * 100}
+    />
+  );
+
+  const renderEmpty = () => {
+    const isSearching = searchQuery.trim().length > 0;
+
+    return (
+      <View className="flex-1 items-center justify-center py-20">
+        <View className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 items-center justify-center mb-4">
+          <Text className="text-2xl">{isSearching ? "🔍" : "📚"}</Text>
+        </View>
+        <Text className="text-xl font-bold text-foreground mb-2">
+          {isSearching ? "No Results Found" : "No Roadmaps Yet"}
+        </Text>
+        <Text className="text-base text-muted-foreground text-center px-8 mb-6">
+          {isSearching
+            ? `No roadmaps match "${searchQuery}". Try a different search term.`
+            : "Start by generating your first learning roadmap from the Home tab"}
+        </Text>
+        {!isSearching && (
+          <View
+            className="px-6 py-3 bg-primary rounded-lg"
+            onTouchEnd={() => router.push("/(tabs)/")}
+          >
+            <Text className="text-white font-semibold">Go to Home</Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View style={styles.separator} />
-    </View>
+    <SafeAreaView className="flex-1 bg-background">
+      <FlatList
+        data={filteredRoadmaps}
+        renderItem={renderRoadmapCard}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6366f1"
+            colors={["#6366f1"]}
+          />
+        }
+        ListHeaderComponent={
+          <>
+            <Animated.View style={headerStyle} className="p-6 pb-2">
+              <Text className="text-3xl font-bold text-foreground pt-8 mb-2 ml-4">
+                My Roadmaps
+              </Text>
+              <Text className="text-base text-muted-foreground mb-2 ml-4">
+                {roadmaps.length > 0
+                  ? `${roadmaps.length} learning path${roadmaps.length === 1 ? "" : "s"} created`
+                  : "Your learning journey starts here"}
+              </Text>
+              {roadmaps.length > 0 && (
+                <View className="flex-row items-center ml-4 mb-2">
+                  <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
+                  <Text className="text-sm text-muted-foreground">
+                    Tap any roadmap to continue learning
+                  </Text>
+                </View>
+              )}
+            </Animated.View>
+
+            {roadmaps.length > 0 && (
+              <SearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search your roadmaps..."
+              />
+            )}
+          </>
+        }
+        ListEmptyComponent={!loading ? renderEmpty : null}
+        ListFooterComponent={<View className="h-6" />}
+        contentContainerStyle={{ flexGrow: 1 }}
+      />
+
+      {loading && (
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-lg text-muted-foreground">
+            Loading roadmaps...
+          </Text>
+        </View>
+      )}
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-    backgroundColor: "#eee",
-  },
-});
