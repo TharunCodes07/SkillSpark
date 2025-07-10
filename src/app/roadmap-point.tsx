@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
 import { YouTubeIcon } from "~/lib/icons/YouTube";
@@ -231,7 +230,6 @@ export default function RoadmapPointScreen() {
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-background">
-        {/* Header with back button */}
         <View className="px-6 py-4 border-b border-border bg-background">
           <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
@@ -247,7 +245,6 @@ export default function RoadmapPointScreen() {
           </View>
         </View>
 
-        {/* Loading Spinner */}
         <View className="flex-1 items-center justify-center px-6">
           <Spinner size={48} />
           <Text className="text-lg font-medium text-foreground mt-6 mb-2">
@@ -284,7 +281,6 @@ export default function RoadmapPointScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <Animated.View style={[containerStyle, { flex: 1 }]}>
-        {/* Header */}
         <View className="px-6 py-4 border-b border-border bg-background">
           <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
@@ -350,7 +346,6 @@ export default function RoadmapPointScreen() {
           </Animated.View>
         </View>
 
-        {/* Content */}
         <ScrollView className="flex-1">
           <View className="flex-1 px-6 py-4">
             <View className="flex-row items-center justify-between mb-4">

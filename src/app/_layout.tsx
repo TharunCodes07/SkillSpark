@@ -12,6 +12,7 @@ import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NAV_THEME } from "~/constants/constants";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
+import { RoadmapDataProvider } from "~/lib/utils/RoadmapDataContext";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -50,14 +51,16 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
-      </ThemeProvider>
+      <RoadmapDataProvider>
+        <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+          <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          />
+        </ThemeProvider>
+      </RoadmapDataProvider>
     </SafeAreaProvider>
   );
 }

@@ -63,13 +63,14 @@ export default function RoadmapGenerator({
     startLoadingAnimation();
 
     try {
-      // Use the real backend API to generate roadmap
       const roadmap = await generateNewRoadmap(topic.trim());
 
-      // Update the context with the new active roadmap
-      setActiveRoadmap(roadmap);
+      // No need to call setActiveRoadmap here since generateNewRoadmap already does it
+      // setActiveRoadmap(roadmap);
+      
+      // Refresh data immediately to update the UI
+      refreshData();
 
-      // Animate success
       cardScale.value = withTiming(1.05, { duration: 200 }, () => {
         cardScale.value = withTiming(1, { duration: 200 });
       });
@@ -83,7 +84,8 @@ export default function RoadmapGenerator({
             onPress: () => {
               setTopic("");
               onRoadmapGenerated?.();
-              refreshData(); // Refresh all data to update stats
+              // No need to refresh data again here
+              // refreshData(); 
             },
           },
         ]

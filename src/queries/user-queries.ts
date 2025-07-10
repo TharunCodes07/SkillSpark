@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const USER_KEY = "@skilltrail_user";
+const USER_KEY = "@SkillSpark_user";
 
 export async function fetchUser() {
   try {

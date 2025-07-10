@@ -30,7 +30,11 @@ export default function ActiveRoadmapDisplay({
 }: ActiveRoadmapDisplayProps) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { activeRoadmap, setActiveRoadmap, refreshTrigger } = useRoadmapData();
+  const {
+    activeRoadmap,
+    setActiveRoadmap,
+    refreshTrigger: contextRefreshTrigger,
+  } = useRoadmapData();
 
   const fadeIn = useSharedValue(0);
   const slideY = useSharedValue(30);
@@ -39,15 +43,16 @@ export default function ActiveRoadmapDisplay({
 
   useEffect(() => {
     loadActiveRoadmap();
-  }, [refreshTrigger]);
+  }, [propRefreshTrigger, contextRefreshTrigger]);
 
   const loadActiveRoadmap = useCallback(async () => {
     try {
       setLoading(true);
       const roadmap = await getActiveRoadmap();
+      
+      // Update the context state with the loaded roadmap
       setActiveRoadmap(roadmap);
 
-      // Animate entrance
       fadeIn.value = withTiming(1, {
         duration: 600,
         easing: Easing.out(Easing.quad),
@@ -57,7 +62,6 @@ export default function ActiveRoadmapDisplay({
         easing: Easing.out(Easing.quad),
       });
 
-      // Animate progress bar
       if (roadmap?.progress) {
         progressWidth.value = withTiming(roadmap.progress.percentage, {
           duration: 1000,
@@ -69,7 +73,7 @@ export default function ActiveRoadmapDisplay({
     } finally {
       setLoading(false);
     }
-  }, [setActiveRoadmap, fadeIn, slideY, progressWidth]);
+  }, [setActiveRoadmap, fadeIn, slideY, progressWidth, contextRefreshTrigger, propRefreshTrigger]);
 
   const handleToggleCompletion = async (
     pointId: string,
@@ -81,12 +85,10 @@ export default function ActiveRoadmapDisplay({
       const newStatus = !currentStatus;
       await updateRoadmapProgress(activeRoadmap.id, pointId, newStatus);
 
-      // Update local state immediately for better UX
       const updatedPoints = activeRoadmap.points.map((point: RoadmapPoint) =>
         point.id === pointId ? { ...point, isCompleted: newStatus } : point
       );
 
-      // Recalculate progress
       const completedPoints = updatedPoints.filter(
         (point: RoadmapPoint) => point.isCompleted
       ).length;
@@ -104,21 +106,17 @@ export default function ActiveRoadmapDisplay({
         },
       };
 
-      // Update the context with the new roadmap
       setActiveRoadmap(updatedRoadmap);
 
-      // Trigger progress update callback if provided
       if (onProgressUpdate) {
         onProgressUpdate();
       }
 
-      // Animate progress bar update
       progressWidth.value = withTiming(percentage, {
         duration: 1000,
         easing: Easing.out(Easing.quad),
       });
 
-      // Add bounce animation to progress section
       progressBounce.value = withSpring(
         1.05,
         { damping: 15, stiffness: 200 },
@@ -131,7 +129,6 @@ export default function ActiveRoadmapDisplay({
       );
     } catch (error) {
       console.error("Error updating progress:", error);
-      // Reload data if update fails
       await loadActiveRoadmap();
     }
   };
@@ -235,7 +232,6 @@ export default function ActiveRoadmapDisplay({
     <Animated.View style={containerStyle} className="mx-6 mb-6">
       <TouchableOpacity onPress={handleRoadmapPress} activeOpacity={0.9}>
         <Card className="p-6 bg-card border border-border ml-4 mr-4">
-          {/* Header */}
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-1">
               <Text className="text-xl font-bold text-foreground">
@@ -253,7 +249,6 @@ export default function ActiveRoadmapDisplay({
             </View>
           </View>
 
-          {/* Progress Section */}
           <Animated.View style={progressSectionStyle} className="mb-6">
             <View className="flex-row items-center justify-between mb-2">
               <Text className="text-sm font-medium text-foreground">
@@ -277,7 +272,6 @@ export default function ActiveRoadmapDisplay({
             </Text>
           </Animated.View>
 
-          {/* Learning Points */}
           <View>
             <Text className="text-lg font-semibold text-foreground mb-3">
               Learning Path
@@ -293,7 +287,7 @@ export default function ActiveRoadmapDisplay({
                     <TouchableOpacity
                       key={point.id}
                       onPress={(e) => {
-                        e.stopPropagation(); // Prevent triggering parent onPress
+                        e.stopPropagation();
                         handlePointPress(point.id);
                       }}
                       className="w-72 mr-3"
@@ -390,7 +384,6 @@ export default function ActiveRoadmapDisplay({
             </ScrollView>
           </View>
 
-          {/* Footer */}
           <View className="mt-6 pt-4 border-t border-border">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">

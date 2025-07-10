@@ -72,7 +72,7 @@ export default function HeroSection() {
       <View className="relative z-10 m-4">
         <Text className="text-5xl font-bold text-foreground mt-5 mb-3">
           Welcome to{"\n"}
-          <Text className="text-indigo-500 font-bold">SkillTrail</Text>
+          <Text className="text-indigo-500 font-bold">SkillSpark</Text>
         </Text>
 
         <Text className="text-lg text-muted-foreground leading-relaxed mb-6">

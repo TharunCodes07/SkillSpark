@@ -1,10 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Storage keys
-const ROADMAPS_KEY = "@skilltrail_roadmaps";
-const ACTIVE_ROADMAP_KEY = "@skilltrail_active_roadmap";
+const ROADMAPS_KEY = "@SkillSpark_roadmaps";
+const ACTIVE_ROADMAP_KEY = "@SkillSpark_active_roadmap";
 
-// Types
 export interface PlaylistItem {
   id: string;
   title: string;
@@ -18,7 +16,7 @@ export interface RoadmapPoint {
   title: string;
   description: string;
   level: "beginner" | "intermediate" | "advanced";
-  playlists: PlaylistItem[] | null; // Playlists will be null initially and created separately
+  playlists: PlaylistItem[] | null;
   isCompleted?: boolean;
   order: number;
 }
@@ -43,7 +41,7 @@ export async function generateRoadmapFromBackend(
 ): Promise<Roadmap> {
   try {
     const response = await fetch(
-      "http://10.12.215.124:8001/api/roadmaps/generate",
+      "http://192.168.175.222:8001/api/roadmaps/generate",
       {
         method: "POST",
         headers: {
@@ -70,7 +68,6 @@ export async function generateRoadmapFromBackend(
   }
 }
 
-// Storage functions
 export async function saveRoadmap(roadmap: Roadmap): Promise<void> {
   try {
     const existingRoadmaps = await getAllRoadmaps();
@@ -88,11 +85,10 @@ export async function getAllRoadmaps(): Promise<Roadmap[]> {
   try {
     const roadmapsData = await AsyncStorage.getItem(ROADMAPS_KEY);
     const roadmaps = roadmapsData ? JSON.parse(roadmapsData) : [];
-    // Ensure we always return an array
     return Array.isArray(roadmaps) ? roadmaps : [];
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
-    return []; // Return empty array on error
+    return [];
   }
 }
 
@@ -112,7 +108,6 @@ export async function deleteRoadmap(id: string): Promise<void> {
     const filteredRoadmaps = roadmaps.filter((roadmap) => roadmap.id !== id);
     await AsyncStorage.setItem(ROADMAPS_KEY, JSON.stringify(filteredRoadmaps));
 
-    // If the deleted roadmap was active, clear active roadmap
     const activeRoadmap = await getActiveRoadmap();
     if (activeRoadmap?.id === id) {
       await clearActiveRoadmap();
@@ -123,11 +118,9 @@ export async function deleteRoadmap(id: string): Promise<void> {
   }
 }
 
-// Active roadmap functions
 export async function setActiveRoadmap(roadmap: Roadmap): Promise<void> {
   try {
     await AsyncStorage.setItem(ACTIVE_ROADMAP_KEY, JSON.stringify(roadmap));
-    // Also save to the roadmaps list
     await saveRoadmap(roadmap);
   } catch (error) {
     console.error("Error setting active roadmap:", error);
@@ -165,7 +158,6 @@ export async function updateRoadmapProgress(
       throw new Error("Roadmap not found");
     }
 
-    // Update the specific point
     const pointIndex = roadmap.points.findIndex(
       (point) => point.id === pointId
     );
@@ -173,7 +165,6 @@ export async function updateRoadmapProgress(
       roadmap.points[pointIndex].isCompleted = isCompleted;
     }
 
-    // Recalculate progress
     const completedPoints = roadmap.points.filter(
       (point) => point.isCompleted
     ).length;
@@ -189,10 +180,8 @@ export async function updateRoadmapProgress(
 
     roadmap.updatedAt = new Date().toISOString();
 
-    // Save updated roadmap
     await saveRoadmap(roadmap);
 
-    // Update active roadmap if this is the active one
     const activeRoadmap = await getActiveRoadmap();
     if (activeRoadmap?.id === roadmapId) {
       await setActiveRoadmap(roadmap);
@@ -232,7 +221,6 @@ export async function getRoadmapProgress(roadmapId: string): Promise<{
   }
 }
 
-// Playlist functions
 export async function updatePlaylistItem(
   roadmapId: string,
   pointId: string,
@@ -251,7 +239,6 @@ export async function updatePlaylistItem(
       throw new Error("Roadmap point not found");
     }
 
-    // Initialize playlists array if it's null
     if (!roadmap.points[pointIndex].playlists) {
       roadmap.points[pointIndex].playlists = [];
     }
@@ -270,7 +257,6 @@ export async function updatePlaylistItem(
     roadmap.updatedAt = new Date().toISOString();
     await saveRoadmap(roadmap);
 
-    // Update active roadmap if this is the active one
     const activeRoadmap = await getActiveRoadmap();
     if (activeRoadmap?.id === roadmapId) {
       await setActiveRoadmap(roadmap);
@@ -299,7 +285,6 @@ export async function getPlaylistsForPoint(
   }
 }
 
-// Function to initialize playlists for a roadmap point
 export async function initializePlaylistsForPoint(
   roadmapId: string,
   pointId: string,
@@ -318,13 +303,11 @@ export async function initializePlaylistsForPoint(
       throw new Error("Roadmap point not found");
     }
 
-    // Set the playlists for this point
     roadmap.points[pointIndex].playlists = playlists;
     roadmap.updatedAt = new Date().toISOString();
 
     await saveRoadmap(roadmap);
 
-    // Update active roadmap if this is the active one
     const activeRoadmap = await getActiveRoadmap();
     if (activeRoadmap?.id === roadmapId) {
       await setActiveRoadmap(roadmap);
@@ -335,7 +318,6 @@ export async function initializePlaylistsForPoint(
   }
 }
 
-// Function to check if playlists are loaded for a point
 export async function arePlaylistsLoadedForPoint(
   roadmapId: string,
   pointId: string
@@ -354,7 +336,6 @@ export async function arePlaylistsLoadedForPoint(
   }
 }
 
-// Backend function to generate playlists for a specific roadmap point
 export async function generatePlaylistsFromBackend(
   roadmapId: string,
   pointId: string,
@@ -363,7 +344,7 @@ export async function generatePlaylistsFromBackend(
 ): Promise<PlaylistItem[]> {
   try {
     const response = await fetch(
-      "http://10.12.215.124:8001/api/playlists/generate",
+      "http://192.168.175.222:8001/api/playlists/generate",
       {
         method: "POST",
         headers: {
@@ -393,7 +374,6 @@ export async function generatePlaylistsFromBackend(
   }
 }
 
-// Function to load playlists for a roadmap point (calls backend and saves to storage)
 export async function loadPlaylistsForPoint(
   roadmapId: string,
   pointId: string,
@@ -401,13 +381,11 @@ export async function loadPlaylistsForPoint(
   pointTitle: string
 ): Promise<PlaylistItem[]> {
   try {
-    // Check if playlists are already loaded
     const areLoaded = await arePlaylistsLoadedForPoint(roadmapId, pointId);
     if (areLoaded) {
       return await getPlaylistsForPoint(roadmapId, pointId);
     }
 
-    // Generate playlists from backend
     const playlists = await generatePlaylistsFromBackend(
       roadmapId,
       pointId,
@@ -415,7 +393,6 @@ export async function loadPlaylistsForPoint(
       pointTitle
     );
 
-    // Save playlists to storage
     await initializePlaylistsForPoint(roadmapId, pointId, playlists);
 
     return playlists;
@@ -425,7 +402,6 @@ export async function loadPlaylistsForPoint(
   }
 }
 
-// Function to regenerate playlists for a roadmap point (forces new backend call)
 export async function regeneratePlaylistsForPoint(
   roadmapId: string,
   pointId: string,
@@ -433,7 +409,6 @@ export async function regeneratePlaylistsForPoint(
   pointTitle: string
 ): Promise<PlaylistItem[]> {
   try {
-    // Generate new playlists from backend (bypassing cache)
     const playlists = await generatePlaylistsFromBackend(
       roadmapId,
       pointId,
@@ -441,7 +416,6 @@ export async function regeneratePlaylistsForPoint(
       pointTitle
     );
 
-    // Save new playlists to storage (overwriting existing ones)
     await initializePlaylistsForPoint(roadmapId, pointId, playlists);
 
     return playlists;
@@ -451,15 +425,10 @@ export async function regeneratePlaylistsForPoint(
   }
 }
 
-// Utility functions
 export async function generateNewRoadmap(topic: string): Promise<Roadmap> {
   try {
-    // Call the backend API to generate the roadmap
     const roadmap = await generateRoadmapFromBackend(topic);
-
-    // Set as active and save
     await setActiveRoadmap(roadmap);
-
     return roadmap;
   } catch (error) {
     console.error("Error generating new roadmap:", error);
@@ -528,7 +497,7 @@ export function createMockRoadmap(topic: string): Roadmap {
         description: `Learn the basics of ${topic}`,
         level: "beginner",
         order: 1,
-        playlists: null, // Playlists will be created when user clicks on the point
+        playlists: null,
         isCompleted: false,
       },
       {
@@ -537,7 +506,7 @@ export function createMockRoadmap(topic: string): Roadmap {
         description: `Dive deeper into ${topic} concepts`,
         level: "intermediate",
         order: 2,
-        playlists: null, // Playlists will be created when user clicks on the point
+        playlists: null,
         isCompleted: false,
       },
       {
@@ -546,7 +515,7 @@ export function createMockRoadmap(topic: string): Roadmap {
         description: `Master advanced ${topic} techniques`,
         level: "advanced",
         order: 3,
-        playlists: null, // Playlists will be created when user clicks on the point
+        playlists: null,
         isCompleted: false,
       },
     ],

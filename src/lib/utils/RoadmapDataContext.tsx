@@ -48,13 +48,17 @@ export const RoadmapDataProvider = ({ children }: { children: ReactNode }) => {
     setRefreshTrigger((prev) => prev + 1);
   }, []);
 
+  const updateActiveRoadmap = useCallback((roadmap: Roadmap | null) => {
+    setActiveRoadmap(roadmap);
+  }, []);
+
   return (
     <RoadmapDataContext.Provider
       value={{
         activeRoadmap,
         stats,
         refreshTrigger,
-        setActiveRoadmap,
+        setActiveRoadmap: updateActiveRoadmap,
         setStats,
         refreshData,
       }}
