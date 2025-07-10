@@ -1,7 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchUser } from "./user-queries";
 
 const ROADMAPS_KEY = "@SkillSpark_roadmaps";
 const ACTIVE_ROADMAP_KEY = "@SkillSpark_active_roadmap";
+
+export interface UserPreferences {
+  depth: "Fast" | "Balanced" | "Detailed";
+  videoLength: "Short" | "Medium" | "Long";
+}
 
 export interface PlaylistItem {
   id: string;
@@ -36,10 +42,30 @@ export interface Roadmap {
   };
 }
 
+async function getUserPreferencesWithDefaults(): Promise<UserPreferences> {
+  try {
+    const user = await fetchUser();
+    return (
+      user?.preferences || {
+        depth: "Balanced",
+        videoLength: "Medium",
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching user preferences:", error);
+    return {
+      depth: "Balanced",
+      videoLength: "Medium",
+    };
+  }
+}
+
 export async function generateRoadmapFromBackend(
   topic: string
 ): Promise<Roadmap> {
   try {
+    const preferences = await getUserPreferencesWithDefaults();
+
     const response = await fetch(
       "http://192.168.175.222:8001/api/roadmaps/generate",
       {
@@ -47,7 +73,10 @@ export async function generateRoadmapFromBackend(
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify({
+          topic,
+          userPreferences: preferences,
+        }),
       }
     );
 
@@ -337,12 +366,12 @@ export async function arePlaylistsLoadedForPoint(
 }
 
 export async function generatePlaylistsFromBackend(
-  roadmapId: string,
-  pointId: string,
   topic: string,
   pointTitle: string
 ): Promise<PlaylistItem[]> {
   try {
+    const preferences = await getUserPreferencesWithDefaults();
+
     const response = await fetch(
       "http://192.168.175.222:8001/api/playlists/generate",
       {
@@ -353,6 +382,7 @@ export async function generatePlaylistsFromBackend(
         body: JSON.stringify({
           topic,
           pointTitle,
+          userPreferences: preferences,
         }),
       }
     );
@@ -386,12 +416,7 @@ export async function loadPlaylistsForPoint(
       return await getPlaylistsForPoint(roadmapId, pointId);
     }
 
-    const playlists = await generatePlaylistsFromBackend(
-      roadmapId,
-      pointId,
-      topic,
-      pointTitle
-    );
+    const playlists = await generatePlaylistsFromBackend(topic, pointTitle);
 
     await initializePlaylistsForPoint(roadmapId, pointId, playlists);
 
@@ -409,12 +434,7 @@ export async function regeneratePlaylistsForPoint(
   pointTitle: string
 ): Promise<PlaylistItem[]> {
   try {
-    const playlists = await generatePlaylistsFromBackend(
-      roadmapId,
-      pointId,
-      topic,
-      pointTitle
-    );
+    const playlists = await generatePlaylistsFromBackend(topic, pointTitle);
 
     await initializePlaylistsForPoint(roadmapId, pointId, playlists);
 
@@ -477,52 +497,4 @@ export async function clearAllRoadmaps(): Promise<void> {
     console.error("Error clearing all roadmaps:", error);
     throw error;
   }
-}
-
-export function createMockRoadmap(topic: string): Roadmap {
-  const id = `roadmap_${Date.now()}`;
-  const now = new Date().toISOString();
-
-  return {
-    id,
-    topic,
-    title: `${topic} Learning Roadmap`,
-    description: `A comprehensive learning roadmap for ${topic}`,
-    createdAt: now,
-    updatedAt: now,
-    points: [
-      {
-        id: `point_${id}_1`,
-        title: `${topic} Fundamentals`,
-        description: `Learn the basics of ${topic}`,
-        level: "beginner",
-        order: 1,
-        playlists: null,
-        isCompleted: false,
-      },
-      {
-        id: `point_${id}_2`,
-        title: `Intermediate ${topic}`,
-        description: `Dive deeper into ${topic} concepts`,
-        level: "intermediate",
-        order: 2,
-        playlists: null,
-        isCompleted: false,
-      },
-      {
-        id: `point_${id}_3`,
-        title: `Advanced ${topic}`,
-        description: `Master advanced ${topic} techniques`,
-        level: "advanced",
-        order: 3,
-        playlists: null,
-        isCompleted: false,
-      },
-    ],
-    progress: {
-      completedPoints: 0,
-      totalPoints: 3,
-      percentage: 0,
-    },
-  };
 }

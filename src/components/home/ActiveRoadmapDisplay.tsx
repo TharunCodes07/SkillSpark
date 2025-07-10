@@ -49,7 +49,7 @@ export default function ActiveRoadmapDisplay({
     try {
       setLoading(true);
       const roadmap = await getActiveRoadmap();
-      
+
       // Update the context state with the loaded roadmap
       setActiveRoadmap(roadmap);
 
@@ -73,7 +73,14 @@ export default function ActiveRoadmapDisplay({
     } finally {
       setLoading(false);
     }
-  }, [setActiveRoadmap, fadeIn, slideY, progressWidth, contextRefreshTrigger, propRefreshTrigger]);
+  }, [
+    setActiveRoadmap,
+    fadeIn,
+    slideY,
+    progressWidth,
+    contextRefreshTrigger,
+    propRefreshTrigger,
+  ]);
 
   const handleToggleCompletion = async (
     pointId: string,

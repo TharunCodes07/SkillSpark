@@ -67,7 +67,7 @@ export default function RoadmapGenerator({
 
       // No need to call setActiveRoadmap here since generateNewRoadmap already does it
       // setActiveRoadmap(roadmap);
-      
+
       // Refresh data immediately to update the UI
       refreshData();
 
@@ -85,7 +85,7 @@ export default function RoadmapGenerator({
               setTopic("");
               onRoadmapGenerated?.();
               // No need to refresh data again here
-              // refreshData(); 
+              // refreshData();
             },
           },
         ]
