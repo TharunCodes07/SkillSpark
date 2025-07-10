@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { Card, CardContent } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
 import { YouTubeIcon } from "~/lib/icons/YouTube";
@@ -30,8 +31,11 @@ import Animated, {
   withSpring,
   withDelay,
   withRepeat,
+  withSequence,
   Easing,
 } from "react-native-reanimated";
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export default function RoadmapPointScreen() {
   const { roadmapId, pointId } = useLocalSearchParams<{
@@ -47,6 +51,40 @@ export default function RoadmapPointScreen() {
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
   const [regeneratingPlaylists, setRegeneratingPlaylists] = useState(false);
   const [roadmapTopic, setRoadmapTopic] = useState("");
+  const pulseScale = useSharedValue(1);
+
+  useEffect(() => {
+    // Gradient pulse animation
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.02, { duration: 3000, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.quad) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseScale.value }],
+  }));
+
+  // Theme-aware gradient colors
+  const gradientColors = isDarkColorScheme
+    ? ([
+        "rgba(99, 102, 241, 0.15)", // Indigo
+        "rgba(168, 85, 247, 0.12)", // Purple
+        "rgba(236, 72, 153, 0.08)", // Pink
+        "rgba(59, 130, 246, 0.05)", // Blue
+        "transparent",
+      ] as const)
+    : ([
+        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
+        "rgba(168, 85, 247, 0.02)", // Very subtle purple
+        "rgba(59, 130, 246, 0.02)", // Very subtle blue
+        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "transparent",
+      ] as const);
 
   const fadeIn = useSharedValue(0);
   const slideY = useSharedValue(50);
@@ -279,151 +317,174 @@ export default function RoadmapPointScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <Animated.View style={[containerStyle, { flex: 1 }]}>
-        <View className="px-6 py-4 border-b border-border bg-background">
-          <View className="flex-row items-center justify-between mb-4">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="p-2 -ml-2"
-            >
-              <Icon name="ArrowLeft" size={24} />
-            </TouchableOpacity>
-            <Text className="text-lg font-semibold text-foreground">
-              Learning Point
-            </Text>
-            <View className="w-8" />
-          </View>
+    <View className="flex-1">
+      {/* Theme-aware Animated Background Gradient */}
+      <AnimatedLinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[
+          pulseStyle,
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+        ]}
+      />
 
-          <Animated.View style={headerStyle}>
-            <Card>
-              <CardContent className="p-4">
-                <View className="mb-3">
-                  <View className="flex-row items-center mb-2">
-                    <View
-                      className="px-2 py-1 rounded-full mr-2"
-                      style={{ backgroundColor: getLevelBgColor(point.level) }}
-                    >
-                      <Text
-                        className="text-xs font-semibold"
-                        style={{ color: getLevelColor(point.level) }}
-                      >
-                        {point.level.toUpperCase()}
-                      </Text>
-                    </View>
-                    <Text className="text-xs text-muted-foreground">
-                      Step {point.order}
-                    </Text>
-                  </View>
-                  <Text className="text-xl font-bold text-foreground mb-2">
-                    {point.title}
-                  </Text>
-                  <Text className="text-sm text-muted-foreground leading-5">
-                    {point.description}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  onPress={handleToggleCompletion}
-                  className="w-full flex-row items-center justify-center py-3 rounded-lg mt-4"
-                  style={{
-                    backgroundColor: point.isCompleted ? "#16a34a" : "#4f46e5",
-                  }}
-                >
-                  <Icon
-                    name={point.isCompleted ? "Check" : "Plus"}
-                    size={20}
-                    color="#ffffff"
-                  />
-                  <Text className="text-white font-semibold ml-2">
-                    {point.isCompleted
-                      ? "Mark as Incomplete"
-                      : "Mark as Complete"}
-                  </Text>
-                </TouchableOpacity>
-              </CardContent>
-            </Card>
-          </Animated.View>
-        </View>
-
-        <ScrollView className="flex-1">
-          <View className="flex-1 px-6 py-4">
+      <SafeAreaView className="flex-1 bg-transparent">
+        <Animated.View style={[containerStyle, { flex: 1 }]}>
+          <View className="px-6 py-4 border-b border-border bg-background">
             <View className="flex-row items-center justify-between mb-4">
+              <TouchableOpacity
+                onPress={() => router.back()}
+                className="p-2 -ml-2"
+              >
+                <Icon name="ArrowLeft" size={24} />
+              </TouchableOpacity>
               <Text className="text-lg font-semibold text-foreground">
-                Learning Videos
+                Learning Point
               </Text>
-
-              {playlists.length > 0 && !loadingPlaylists && (
-                <TouchableOpacity
-                  onPress={handleRegeneratePlaylists}
-                  disabled={regeneratingPlaylists}
-                  className="flex-row items-center px-3 py-2 bg-muted rounded-lg"
-                >
-                  {regeneratingPlaylists ? (
-                    <>
-                      <Spinner size={16} />
-                      <Text className="text-primary font-medium text-xs ml-2">
-                        Generating...
-                      </Text>
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="RotateCcw" size={16} color="#4f46e5" />
-                      <Text className="text-primary font-medium text-xs ml-2">
-                        Regenerate
-                      </Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              )}
+              <View className="w-8" />
             </View>
 
-            {loadingPlaylists ? (
-              <View className="items-center py-10">
-                <Spinner size={40} />
-                <Text className="text-lg font-medium text-foreground mt-6 mb-2">
-                  Generating videos...
-                </Text>
-                <Text className="text-sm text-muted-foreground text-center max-w-xs">
-                  We're finding the best learning videos for this topic
-                </Text>
-              </View>
-            ) : playlists.length > 0 ? (
-              <View>
-                {playlists.map((playlist, index) => (
-                  <View key={playlist.id} className="mb-3">
-                    <PlaylistCard playlist={playlist} index={index} />
-                  </View>
-                ))}
-              </View>
-            ) : (
+            <Animated.View style={headerStyle}>
               <Card>
-                <CardContent className="p-6 items-center">
-                  <View className="w-16 h-16 bg-muted rounded-full items-center justify-center mb-4">
-                    <Icon name="Video" size={24} />
+                <CardContent className="p-4">
+                  <View className="mb-3">
+                    <View className="flex-row items-center mb-2">
+                      <View
+                        className="px-2 py-1 rounded-full mr-2"
+                        style={{
+                          backgroundColor: getLevelBgColor(point.level),
+                        }}
+                      >
+                        <Text
+                          className="text-xs font-semibold"
+                          style={{ color: getLevelColor(point.level) }}
+                        >
+                          {point.level.toUpperCase()}
+                        </Text>
+                      </View>
+                      <Text className="text-xs text-muted-foreground">
+                        Step {point.order}
+                      </Text>
+                    </View>
+                    <Text className="text-xl font-bold text-foreground mb-2">
+                      {point.title}
+                    </Text>
+                    <Text className="text-sm text-muted-foreground leading-5">
+                      {point.description}
+                    </Text>
                   </View>
-                  <Text className="text-lg font-semibold text-foreground mb-2">
-                    No Videos Available
-                  </Text>
-                  <Text className="text-sm text-muted-foreground text-center mb-4">
-                    Learning videos for this topic haven't been loaded yet.
-                  </Text>
+
                   <TouchableOpacity
-                    onPress={() => loadPlaylists(point, roadmapTopic)}
-                    className="flex-row items-center px-4 py-3 bg-primary rounded-lg"
+                    onPress={handleToggleCompletion}
+                    className="w-full flex-row items-center justify-center py-3 rounded-lg mt-4"
+                    style={{
+                      backgroundColor: point.isCompleted
+                        ? "#16a34a"
+                        : "#4f46e5",
+                    }}
                   >
-                    <Icon name="Download" size={16} color="#ffffff" />
-                    <Text className="text-primary-foreground font-medium ml-2">
-                      Load Videos
+                    <Icon
+                      name={point.isCompleted ? "Check" : "Plus"}
+                      size={20}
+                      color="#ffffff"
+                    />
+                    <Text className="text-white font-semibold ml-2">
+                      {point.isCompleted
+                        ? "Mark as Incomplete"
+                        : "Mark as Complete"}
                     </Text>
                   </TouchableOpacity>
                 </CardContent>
               </Card>
-            )}
+            </Animated.View>
           </View>
-        </ScrollView>
-      </Animated.View>
-    </SafeAreaView>
+
+          <ScrollView className="flex-1">
+            <View className="flex-1 px-6 py-4">
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-lg font-semibold text-foreground">
+                  Learning Videos
+                </Text>
+
+                {playlists.length > 0 && !loadingPlaylists && (
+                  <TouchableOpacity
+                    onPress={handleRegeneratePlaylists}
+                    disabled={regeneratingPlaylists}
+                    className="flex-row items-center px-3 py-2 bg-muted rounded-lg"
+                  >
+                    {regeneratingPlaylists ? (
+                      <>
+                        <Spinner size={16} />
+                        <Text className="text-primary font-medium text-xs ml-2">
+                          Generating...
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="RotateCcw" size={16} color="#4f46e5" />
+                        <Text className="text-primary font-medium text-xs ml-2">
+                          Regenerate
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {loadingPlaylists ? (
+                <View className="items-center py-10">
+                  <Spinner size={40} />
+                  <Text className="text-lg font-medium text-foreground mt-6 mb-2">
+                    Generating videos...
+                  </Text>
+                  <Text className="text-sm text-muted-foreground text-center max-w-xs">
+                    We're finding the best learning videos for this topic
+                  </Text>
+                </View>
+              ) : playlists.length > 0 ? (
+                <View>
+                  {playlists.map((playlist, index) => (
+                    <View key={playlist.id} className="mb-3">
+                      <PlaylistCard playlist={playlist} index={index} />
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Card>
+                  <CardContent className="p-6 items-center">
+                    <View className="w-16 h-16 bg-muted rounded-full items-center justify-center mb-4">
+                      <Icon name="Video" size={24} />
+                    </View>
+                    <Text className="text-lg font-semibold text-foreground mb-2">
+                      No Videos Available
+                    </Text>
+                    <Text className="text-sm text-muted-foreground text-center mb-4">
+                      Learning videos for this topic haven't been loaded yet.
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => loadPlaylists(point, roadmapTopic)}
+                      className="flex-row items-center px-4 py-3 bg-primary rounded-lg"
+                    >
+                      <Icon name="Download" size={16} color="#ffffff" />
+                      <Text className="text-primary-foreground font-medium ml-2">
+                        Load Videos
+                      </Text>
+                    </TouchableOpacity>
+                  </CardContent>
+                </Card>
+              )}
+            </View>
+          </ScrollView>
+        </Animated.View>
+      </SafeAreaView>
+    </View>
   );
 }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { Card } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
@@ -18,7 +19,12 @@ import Animated, {
   withTiming,
   withSpring,
   withDelay,
+  withRepeat,
+  withSequence,
+  Easing,
 } from "react-native-reanimated";
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export default function RoadmapDetailScreen() {
   const { roadmapId } = useLocalSearchParams<{ roadmapId: string }>();
@@ -27,10 +33,44 @@ export default function RoadmapDetailScreen() {
 
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
+  const pulseScale = useSharedValue(1);
 
   useEffect(() => {
     loadRoadmap();
   }, [roadmapId]);
+
+  useEffect(() => {
+    // Gradient pulse animation
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.02, { duration: 3000, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.quad) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseScale.value }],
+  }));
+
+  // Theme-aware gradient colors
+  const gradientColors = isDarkColorScheme
+    ? ([
+        "rgba(99, 102, 241, 0.15)", // Indigo
+        "rgba(168, 85, 247, 0.12)", // Purple
+        "rgba(236, 72, 153, 0.08)", // Pink
+        "rgba(59, 130, 246, 0.05)", // Blue
+        "transparent",
+      ] as const)
+    : ([
+        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
+        "rgba(168, 85, 247, 0.02)", // Very subtle purple
+        "rgba(59, 130, 246, 0.02)", // Very subtle blue
+        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "transparent",
+      ] as const);
 
   const loadRoadmap = async () => {
     if (!roadmapId) return;
@@ -142,69 +182,90 @@ export default function RoadmapDetailScreen() {
     totalPoints > 0 ? Math.round((completedPoints / totalPoints) * 100) : 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="p-6 pb-4">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="flex-row items-center mb-4"
-          >
-            <Icon name="ArrowLeft" size={24} color="#6366f1" />
-            <Text className="text-lg font-medium text-primary ml-2">Back</Text>
-          </TouchableOpacity>
+    <View className="flex-1">
+      {/* Theme-aware Animated Background Gradient */}
+      <AnimatedLinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[
+          pulseStyle,
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+        ]}
+      />
 
-          <Text className="text-3xl font-bold text-foreground mb-2">
-            {roadmap.topic}
-          </Text>
-          <Text className="text-base text-muted-foreground mb-4">
-            {roadmap.description}
-          </Text>
+      <SafeAreaView className="flex-1 bg-transparent">
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View className="p-6 pb-4">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="flex-row items-center mb-4"
+            >
+              <Icon name="ArrowLeft" size={24} color="#6366f1" />
+              <Text className="text-lg font-medium text-primary ml-2">
+                Back
+              </Text>
+            </TouchableOpacity>
 
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
-              <Icon name="Target" size={20} color="#6366f1" />
-              <Text className="text-base font-medium text-foreground ml-2">
-                {completedPoints}/{totalPoints} completed
+            <Text className="text-3xl font-bold text-foreground mb-2">
+              {roadmap.topic}
+            </Text>
+            <Text className="text-base text-muted-foreground mb-4">
+              {roadmap.description}
+            </Text>
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <Icon name="Target" size={20} color="#6366f1" />
+                <Text className="text-base font-medium text-foreground ml-2">
+                  {completedPoints}/{totalPoints} completed
+                </Text>
+              </View>
+              <Text className="text-lg font-bold text-primary">
+                {progressPercentage}%
               </Text>
             </View>
-            <Text className="text-lg font-bold text-primary">
-              {progressPercentage}%
-            </Text>
-          </View>
 
-          {/* Progress Bar */}
-          <View className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-3">
-            <View
-              className="h-2 bg-primary rounded-full"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </View>
-        </View>
-
-        {/* Roadmap Points */}
-        <View className="px-6">
-          <Text className="text-xl font-bold text-foreground mb-4">
-            Learning Path
-          </Text>
-
-          {roadmap.points?.map((point, index) => (
-            <View key={point.id} className="mb-4">
-              <RoadmapPointCard
-                key={point.id}
-                point={point}
-                index={index}
-                onPress={() => handlePointPress(point)}
-                onToggleComplete={() => handleToggleComplete(point)}
-                delay={index * 100}
+            {/* Progress Bar */}
+            <View className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-3">
+              <View
+                className="h-2 bg-primary rounded-full"
+                style={{ width: `${progressPercentage}%` }}
               />
             </View>
-          ))}
-        </View>
+          </View>
 
-        <View className="h-6" />
-      </ScrollView>
-    </SafeAreaView>
+          {/* Roadmap Points */}
+          <View className="px-6">
+            <Text className="text-xl font-bold text-foreground mb-4">
+              Learning Path
+            </Text>
+
+            {roadmap.points?.map((point, index) => (
+              <View key={point.id} className="mb-4">
+                <RoadmapPointCard
+                  key={point.id}
+                  point={point}
+                  index={index}
+                  onPress={() => handlePointPress(point)}
+                  onToggleComplete={() => handleToggleComplete(point)}
+                  delay={index * 100}
+                />
+              </View>
+            ))}
+          </View>
+
+          <View className="h-6" />
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 

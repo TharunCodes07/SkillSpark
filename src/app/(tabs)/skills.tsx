@@ -2,16 +2,24 @@ import React, { useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, RefreshControl, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { getAllRoadmaps, Roadmap } from "~/queries/roadmap-queries";
 import RoadmapCard from "~/components/skills/RoadmapCard";
 import SearchBar from "~/components/skills/SearchBar";
 import { Button } from "~/components/ui/button";
+import Icon from "~/lib/icons/Icon";
+import { useColorScheme } from "~/lib/utils/useColorScheme";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSpring,
+  withRepeat,
+  withSequence,
+  Easing,
 } from "react-native-reanimated";
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export default function SkillsScreen() {
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
@@ -20,10 +28,12 @@ export default function SkillsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { isDarkColorScheme } = useColorScheme();
 
   // Animation values
   const headerOpacity = useSharedValue(0);
   const headerTranslateY = useSharedValue(30);
+  const pulseScale = useSharedValue(1);
 
   useEffect(() => {
     // Animate header on mount
@@ -34,6 +44,39 @@ export default function SkillsScreen() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    // Gradient pulse animation
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.02, { duration: 3000, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.quad) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseScale.value }],
+  }));
+
+  // Theme-aware gradient colors
+  const gradientColors = isDarkColorScheme
+    ? ([
+        "rgba(99, 102, 241, 0.15)", // Indigo
+        "rgba(168, 85, 247, 0.12)", // Purple
+        "rgba(236, 72, 153, 0.08)", // Pink
+        "rgba(59, 130, 246, 0.05)", // Blue
+        "transparent",
+      ] as const)
+    : ([
+        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
+        "rgba(168, 85, 247, 0.02)", // Very subtle purple
+        "rgba(59, 130, 246, 0.02)", // Very subtle blue
+        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "transparent",
+      ] as const);
 
   // Load roadmaps when screen focuses
   useFocusEffect(
@@ -119,7 +162,15 @@ export default function SkillsScreen() {
     return (
       <View className="flex-1 items-center justify-center py-20">
         <View className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 items-center justify-center mb-4">
-          <Text className="text-2xl">{isSearching ? "🔍" : "📚"}</Text>
+          {isSearching ? (
+            <Text className="text-2xl">🔍</Text>
+          ) : (
+            <Icon
+              name="BookDashed"
+              size={32}
+              className="text-muted-foreground"
+            />
+          )}
         </View>
         <Text className="text-xl font-bold text-foreground mb-2">
           {isSearching ? "No Results Found" : "No Roadmaps Yet"}
@@ -141,62 +192,81 @@ export default function SkillsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <FlatList
-        data={filteredRoadmaps}
-        renderItem={renderRoadmapCard}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#6366f1"
-            colors={["#6366f1"]}
-          />
-        }
-        ListHeaderComponent={
-          <>
-            <Animated.View style={headerStyle} className="p-6 pb-2">
-              <Text className="text-3xl font-bold text-foreground pt-8 mb-2 ml-4">
-                My Roadmaps
-              </Text>
-              <Text className="text-base text-muted-foreground mb-2 ml-4">
-                {roadmaps.length > 0
-                  ? `${roadmaps.length} learning path${roadmaps.length === 1 ? "" : "s"} created`
-                  : "Your learning journey starts here"}
-              </Text>
-              {roadmaps.length > 0 && (
-                <View className="flex-row items-center ml-4 mb-2">
-                  <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
-                  <Text className="text-sm text-muted-foreground">
-                    Tap any roadmap to continue learning
-                  </Text>
-                </View>
-              )}
-            </Animated.View>
-
-            {roadmaps.length > 0 && (
-              <SearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search your roadmaps..."
-              />
-            )}
-          </>
-        }
-        ListEmptyComponent={!loading ? renderEmpty : null}
-        ListFooterComponent={<View className="h-6" />}
-        contentContainerStyle={{ flexGrow: 1 }}
+    <View className="flex-1">
+      {/* Theme-aware Animated Background Gradient */}
+      <AnimatedLinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[
+          pulseStyle,
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+        ]}
       />
 
-      {loading && (
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-lg text-muted-foreground">
-            Loading roadmaps...
-          </Text>
-        </View>
-      )}
-    </SafeAreaView>
+      <SafeAreaView className="flex-1 bg-transparent">
+        <FlatList
+          data={filteredRoadmaps}
+          renderItem={renderRoadmapCard}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#6366f1"
+              colors={["#6366f1"]}
+            />
+          }
+          ListHeaderComponent={
+            <>
+              <Animated.View style={headerStyle} className="p-6 pb-2">
+                <Text className="text-3xl font-bold text-foreground pt-8 mb-2 ml-4">
+                  My Roadmaps
+                </Text>
+                <Text className="text-base text-muted-foreground mb-2 ml-4">
+                  {roadmaps.length > 0
+                    ? `${roadmaps.length} learning path${roadmaps.length === 1 ? "" : "s"} created`
+                    : "Your learning journey starts here"}
+                </Text>
+                {roadmaps.length > 0 && (
+                  <View className="flex-row items-center ml-4 mb-2">
+                    <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
+                    <Text className="text-sm text-muted-foreground">
+                      Tap any roadmap to continue learning
+                    </Text>
+                  </View>
+                )}
+              </Animated.View>
+
+              {roadmaps.length > 0 && (
+                <SearchBar
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholder="Search your roadmaps..."
+                />
+              )}
+            </>
+          }
+          ListEmptyComponent={!loading ? renderEmpty : null}
+          ListFooterComponent={<View className="h-6" />}
+          contentContainerStyle={{ flexGrow: 1 }}
+        />
+
+        {loading && (
+          <View className="flex-1 items-center justify-center">
+            <Text className="text-lg text-muted-foreground">
+              Loading roadmaps...
+            </Text>
+          </View>
+        )}
+      </SafeAreaView>
+    </View>
   );
 }
