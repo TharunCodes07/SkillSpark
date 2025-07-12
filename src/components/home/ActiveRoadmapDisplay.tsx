@@ -50,7 +50,6 @@ export default function ActiveRoadmapDisplay({
       setLoading(true);
       const roadmap = await getActiveRoadmap();
 
-      // Update the context state with the loaded roadmap
       setActiveRoadmap(roadmap);
 
       fadeIn.value = withTiming(1, {
@@ -236,7 +235,7 @@ export default function ActiveRoadmapDisplay({
   };
 
   return (
-    <Animated.View style={containerStyle} className="mx-6 mb-6">
+    <Animated.View style={containerStyle} className="mx-3 mb-6">
       <TouchableOpacity onPress={handleRoadmapPress} activeOpacity={0.9}>
         <Card className="p-6 bg-card border border-border ml-4 mr-4">
           <View className="flex-row items-center justify-between mb-4">

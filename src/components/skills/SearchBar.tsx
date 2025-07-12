@@ -69,7 +69,7 @@ export default function SearchBar({
   });
 
   return (
-    <Animated.View style={containerStyle} className="mx-4 mb-6">
+    <Animated.View style={containerStyle} className="mx-3 mb-6">
       <Card className="bg-card border-0 m-4">
         <Animated.View
           style={[

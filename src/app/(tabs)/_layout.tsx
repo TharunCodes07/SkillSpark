@@ -12,7 +12,11 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarHideOnKeyboard: true,
+        tabBarHideOnKeyboard: false,
+        tabBarStyle: {
+          position: "absolute",
+          bottom: 0,
+        },
       }}
     >
       <Tabs.Screen

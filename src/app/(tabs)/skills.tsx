@@ -89,7 +89,6 @@ export default function SkillsScreen() {
     try {
       setLoading(true);
       const allRoadmaps = await getAllRoadmaps();
-      // Sort by creation date (newest first)
       const sortedRoadmaps = allRoadmaps.sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -193,7 +192,6 @@ export default function SkillsScreen() {
 
   return (
     <View className="flex-1">
-      {/* Theme-aware Animated Background Gradient */}
       <AnimatedLinearGradient
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
@@ -227,7 +225,7 @@ export default function SkillsScreen() {
           ListHeaderComponent={
             <>
               <Animated.View style={headerStyle} className="p-6 pb-2">
-                <Text className="text-3xl font-bold text-foreground pt-8 mb-2 ml-4">
+                <Text className="text-3xl font-bold text-foreground pt-8 mb-2 ml-3">
                   My Roadmaps
                 </Text>
                 <Text className="text-base text-muted-foreground mb-2 ml-4">
@@ -236,7 +234,7 @@ export default function SkillsScreen() {
                     : "Your learning journey starts here"}
                 </Text>
                 {roadmaps.length > 0 && (
-                  <View className="flex-row items-center ml-4 mb-2">
+                  <View className="flex-row items-center ml-3 mb-2">
                     <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
                     <Text className="text-sm text-muted-foreground">
                       Tap any roadmap to continue learning

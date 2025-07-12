@@ -40,7 +40,6 @@ export default function RoadmapDetailScreen() {
   }, [roadmapId]);
 
   useEffect(() => {
-    // Gradient pulse animation
     pulseScale.value = withRepeat(
       withSequence(
         withTiming(1.02, { duration: 3000, easing: Easing.inOut(Easing.quad) }),
@@ -55,7 +54,6 @@ export default function RoadmapDetailScreen() {
     transform: [{ scale: pulseScale.value }],
   }));
 
-  // Theme-aware gradient colors
   const gradientColors = isDarkColorScheme
     ? ([
         "rgba(99, 102, 241, 0.15)", // Indigo

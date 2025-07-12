@@ -21,25 +21,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.tharuncodes.SkillSpark",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "http",
-              "host": "m.youtube.com",
-              "pathPrefix": "/watch"
-            },
-            {
-              "scheme": "https",
-              "host": "m.youtube.com",
-              "pathPrefix": "/watch"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
+      "package": "com.tharuncodes.SkillSpark"
     },
     "web": {
       "favicon": "./assets/favicon.png"

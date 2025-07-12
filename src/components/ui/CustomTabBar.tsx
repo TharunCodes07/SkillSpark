@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Pressable, Text, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 import { Home, Rocket, Settings as SettingsIcon } from "lucide-react-native";
 
@@ -21,11 +22,19 @@ export default function CustomTabBar({
   navigation,
 }: CustomTabBarProps) {
   const { isDarkColorScheme } = useColorScheme();
-  const bottomPadding = Platform.OS === "ios" ? 34 : 20;
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(
+    insets.bottom,
+    Platform.OS === "ios" ? 34 : 20
+  );
 
   return (
     <View
       style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
         flexDirection: "row",
         backgroundColor: isDarkColorScheme ? "#111111" : "#ffffff",
         borderTopLeftRadius: 32,

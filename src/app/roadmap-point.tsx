@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Linking,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,6 +17,7 @@ import {
   RoadmapPoint,
   PlaylistItem,
 } from "~/queries/roadmap-queries";
+import * as Linking from "expo-linking";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -514,18 +508,54 @@ function PlaylistCard({ playlist, index }: PlaylistCardProps) {
   const handlePress = async () => {
     try {
       if (playlist.videoUrl) {
-        const supported = await Linking.canOpenURL(playlist.videoUrl);
+        // Normalize URL to ensure it has proper protocol
+        let url = playlist.videoUrl.trim();
+
+        // Add https if no protocol is specified
+        if (!url.match(/^https?:\/\//)) {
+          url = `https://${url}`;
+        }
+
+        // For YouTube URLs, try to use the YouTube app first, then fallback to browser
+        if (url.includes("youtube.com") || url.includes("youtu.be")) {
+          // Try YouTube app first
+          const youtubeAppUrl = url
+            .replace("https://www.youtube.com", "vnd.youtube:")
+            .replace("https://youtube.com", "vnd.youtube:")
+            .replace("https://youtu.be/", "vnd.youtube:");
+
+          try {
+            const youtubeSupported = await Linking.canOpenURL(youtubeAppUrl);
+            if (youtubeSupported) {
+              await Linking.openURL(youtubeAppUrl);
+              return;
+            }
+          } catch (youtubeError) {
+            console.log("YouTube app not available, trying browser");
+          }
+        }
+
+        // Fallback to regular URL opening
+        const supported = await Linking.canOpenURL(url);
         if (supported) {
-          await Linking.openURL(playlist.videoUrl);
+          await Linking.openURL(url);
         } else {
-          Alert.alert("Error", "Cannot open this video link");
+          Alert.alert(
+            "Cannot Open Link",
+            "Unable to open this video link. Please make sure you have a web browser or YouTube app installed.",
+            [{ text: "OK", style: "default" }]
+          );
         }
       } else {
         Alert.alert("No Link", "Video link not available");
       }
     } catch (error) {
       console.error("Error opening video:", error);
-      Alert.alert("Error", "Failed to open video link");
+      Alert.alert(
+        "Error",
+        "Failed to open video link. Please try again or copy the link manually.",
+        [{ text: "OK", style: "default" }]
+      );
     }
   };
 

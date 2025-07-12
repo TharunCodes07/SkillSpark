@@ -125,7 +125,8 @@ export default function HomeScreen() {
             onProgressUpdate={handleProgressUpdate}
           />
 
-          <View className="h-6" />
+          {/* Bottom padding to account for fixed tab bar */}
+          <View className="h-32" />
         </ScrollView>
       </SafeAreaView>
     </View>
