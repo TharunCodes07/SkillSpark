@@ -3,6 +3,7 @@ import { View, Text, TextInput, Alert } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import Icon from "~/lib/icons/Icon";
+import SuccessAlert from "~/components/ui/SuccessAlert";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 import { useRoadmapData } from "~/lib/utils/RoadmapDataContext";
 import { generateNewRoadmap } from "~/queries/roadmap-queries";
@@ -26,6 +27,8 @@ export default function RoadmapGenerator({
 }: RoadmapGeneratorProps) {
   const [topic, setTopic] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [generatedTopic, setGeneratedTopic] = useState("");
   const { isDarkColorScheme } = useColorScheme();
   const { setActiveRoadmap, refreshData } = useRoadmapData();
 
@@ -75,21 +78,8 @@ export default function RoadmapGenerator({
         cardScale.value = withTiming(1, { duration: 200 });
       });
 
-      Alert.alert(
-        "Success!",
-        `Generated roadmap for "${topic}". Check it out below!`,
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              setTopic("");
-              onRoadmapGenerated?.();
-              // No need to refresh data again here
-              // refreshData();
-            },
-          },
-        ]
-      );
+      setGeneratedTopic(topic.trim());
+      setShowSuccessAlert(true);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -258,6 +248,18 @@ export default function RoadmapGenerator({
           </Text>
         </View>
       </Card>
+
+      <SuccessAlert
+        visible={showSuccessAlert}
+        title="Success!"
+        message={`Generated roadmap for "${generatedTopic}". Check it out below!`}
+        onDismiss={() => {
+          setShowSuccessAlert(false);
+          setTopic("");
+          onRoadmapGenerated?.();
+        }}
+        buttonText="Awesome!"
+      />
     </Animated.View>
   );
 }
