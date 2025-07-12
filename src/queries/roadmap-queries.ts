@@ -42,6 +42,8 @@ export interface Roadmap {
   };
 }
 
+const BASE = process.env.EXPO_PUBLIC_BACKEND_URL!;
+
 async function getUserPreferencesWithDefaults(): Promise<UserPreferences> {
   try {
     const user = await fetchUser();
@@ -66,19 +68,16 @@ export async function generateRoadmapFromBackend(
   try {
     const preferences = await getUserPreferencesWithDefaults();
 
-    const response = await fetch(
-      "http://192.168.175.222:8001/api/roadmaps/generate",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          topic,
-          userPreferences: preferences,
-        }),
-      }
-    );
+    const response = await fetch(`${BASE}/api/roadmaps/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        topic,
+        userPreferences: preferences,
+      }),
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -372,20 +371,17 @@ export async function generatePlaylistsFromBackend(
   try {
     const preferences = await getUserPreferencesWithDefaults();
 
-    const response = await fetch(
-      "http://192.168.175.222:8001/api/playlists/generate",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          topic,
-          pointTitle,
-          userPreferences: preferences,
-        }),
-      }
-    );
+    const response = await fetch(`${BASE}/api/playlists/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        topic,
+        pointTitle,
+        userPreferences: preferences,
+      }),
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
