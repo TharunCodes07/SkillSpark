@@ -12,7 +12,7 @@ export default function ClearDataSetting() {
   const handleClearData = async () => {
     await clearUserData();
     setShowBottomSheet(false);
-    triggerRefresh(); // Trigger refresh for all components
+    triggerRefresh();
     Alert.alert("Success", "All data has been cleared successfully.");
   };
 

@@ -29,7 +29,6 @@ export default function PreferencesSetting() {
     loadPreferences();
   }, []);
 
-  // Refresh data when refresh is triggered
   useEffect(() => {
     loadPreferences();
   }, [refreshTrigger]);
@@ -101,7 +100,6 @@ export default function PreferencesSetting() {
         </Pressable>
       </View>
 
-      {/* Depth Selection BottomSheet */}
       <BottomSheet
         isVisible={showDepthSheet}
         onClose={() => setShowDepthSheet(false)}
@@ -132,7 +130,6 @@ export default function PreferencesSetting() {
         </View>
       </BottomSheet>
 
-      {/* Video Length Selection BottomSheet */}
       <BottomSheet
         isVisible={showVideoLengthSheet}
         onClose={() => setShowVideoLengthSheet(false)}

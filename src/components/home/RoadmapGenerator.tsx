@@ -68,10 +68,6 @@ export default function RoadmapGenerator({
     try {
       const roadmap = await generateNewRoadmap(topic.trim());
 
-      // No need to call setActiveRoadmap here since generateNewRoadmap already does it
-      // setActiveRoadmap(roadmap);
-
-      // Refresh data immediately to update the UI
       refreshData();
 
       cardScale.value = withTiming(1.05, { duration: 200 }, () => {

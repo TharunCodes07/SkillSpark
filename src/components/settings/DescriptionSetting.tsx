@@ -26,14 +26,12 @@ export default function DescriptionSetting() {
     loadDescription();
   }, []);
 
-  // Refresh data when component comes into focus
   useFocusEffect(
     React.useCallback(() => {
       loadDescription();
     }, [])
   );
 
-  // Refresh data when refresh is triggered
   useEffect(() => {
     loadDescription();
   }, [refreshTrigger]);

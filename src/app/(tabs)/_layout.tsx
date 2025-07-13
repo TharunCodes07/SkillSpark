@@ -12,7 +12,7 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarHideOnKeyboard: false,
+        tabBarHideOnKeyboard: Platform.OS === "ios" ? false : true,
         tabBarStyle: {
           position: "absolute",
           bottom: 0,

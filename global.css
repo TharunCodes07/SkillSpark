@@ -48,12 +48,10 @@
   }
 }
 
-/* Ensure proper color inheritance */
 * {
   color: inherit;
 }
 
-/* Dark mode adjustments for better visibility */
 .dark {
   color-scheme: dark;
 }

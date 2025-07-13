@@ -44,9 +44,6 @@ function SelectTrigger({
   );
 }
 
-/**
- * Platform: WEB ONLY
- */
 function SelectScrollUpButton({
   className,
   ...props
@@ -67,9 +64,6 @@ function SelectScrollUpButton({
   );
 }
 
-/**
- * Platform: WEB ONLY
- */
 function SelectScrollDownButton({
   className,
   ...props

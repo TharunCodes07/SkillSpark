@@ -119,17 +119,14 @@ export default function SuccessAlert({
                     <Icon name="Check" size={32} color="#ffffff" />
                   </Animated.View>
 
-                  {/* Title */}
                   <Text className="text-xl font-bold text-foreground mb-2 text-center">
                     {title}
                   </Text>
 
-                  {/* Message */}
                   <Text className="text-sm text-muted-foreground text-center leading-5 mb-6">
                     {message}
                   </Text>
 
-                  {/* Action Button */}
                   <Button
                     onPress={onDismiss}
                     className="w-full"

@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Pressable, Text, Platform } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Pressable, Text, Platform, Keyboard } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 import { Home, Rocket, Settings as SettingsIcon } from "lucide-react-native";
@@ -23,10 +23,45 @@ export default function CustomTabBar({
 }: CustomTabBarProps) {
   const { isDarkColorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
   const bottomPadding = Math.max(
     insets.bottom,
     Platform.OS === "ios" ? 34 : 20
   );
+
+  useEffect(() => {
+    const keyboardWillShow = (e: any) => {
+      if (Platform.OS === "android") {
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    };
+
+    const keyboardWillHide = () => {
+      if (Platform.OS === "android") {
+        setKeyboardHeight(0);
+      }
+    };
+
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      keyboardWillShow
+    );
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      keyboardWillHide
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  // Hide tab bar on Android when keyboard is visible
+  if (Platform.OS === "android" && keyboardHeight > 0) {
+    return null;
+  }
 
   return (
     <View

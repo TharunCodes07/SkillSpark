@@ -1,5 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, ScrollView, RefreshControl } from "react-native";
+import {
+  View,
+  ScrollView,
+  RefreshControl,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -42,20 +48,19 @@ export default function HomeScreen() {
     transform: [{ scale: pulseScale.value }],
   }));
 
-  // Theme-aware gradient colors
   const gradientColors = isDarkColorScheme
     ? ([
-        "rgba(99, 102, 241, 0.15)", // Indigo
-        "rgba(168, 85, 247, 0.12)", // Purple
-        "rgba(236, 72, 153, 0.08)", // Pink
-        "rgba(59, 130, 246, 0.05)", // Blue
+        "rgba(99, 102, 241, 0.15)",
+        "rgba(168, 85, 247, 0.12)",
+        "rgba(236, 72, 153, 0.08)",
+        "rgba(59, 130, 246, 0.05)",
         "transparent",
       ] as const)
     : ([
-        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
-        "rgba(168, 85, 247, 0.02)", // Very subtle purple
-        "rgba(59, 130, 246, 0.02)", // Very subtle blue
-        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "rgba(99, 102, 241, 0.03)",
+        "rgba(168, 85, 247, 0.02)",
+        "rgba(59, 130, 246, 0.02)",
+        "rgba(236, 72, 153, 0.01)",
         "transparent",
       ] as const);
 
@@ -83,52 +88,56 @@ export default function HomeScreen() {
   );
 
   return (
-    <View className="flex-1">
-      {/* Theme-aware Animated Background Gradient */}
-      <AnimatedLinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[
-          pulseStyle,
-          {
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          },
-        ]}
-      />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <View className="flex-1">
+        <AnimatedLinearGradient
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[
+            pulseStyle,
+            {
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            },
+          ]}
+        />
 
-      <SafeAreaView className="flex-1 bg-transparent">
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#6366f1"
-              colors={["#6366f1"]}
+        <SafeAreaView className="flex-1 bg-transparent">
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#6366f1"
+                colors={["#6366f1"]}
+              />
+            }
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 120 }}
+          >
+            <HeroSection />
+
+            <RoadmapGenerator onRoadmapGenerated={handleRoadmapGenerated} />
+
+            <LearningStats key={refreshTrigger} />
+
+            <ActiveRoadmapDisplay
+              refreshTrigger={refreshTrigger}
+              onProgressUpdate={handleProgressUpdate}
             />
-          }
-        >
-          <HeroSection />
-
-          <RoadmapGenerator onRoadmapGenerated={handleRoadmapGenerated} />
-
-          <LearningStats key={refreshTrigger} />
-
-          <ActiveRoadmapDisplay
-            refreshTrigger={refreshTrigger}
-            onProgressUpdate={handleProgressUpdate}
-          />
-
-          {/* Bottom padding to account for fixed tab bar */}
-          <View className="h-32" />
-        </ScrollView>
-      </SafeAreaView>
-    </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

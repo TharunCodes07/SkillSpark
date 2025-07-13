@@ -11,7 +11,6 @@ export interface LearningTopic {
 }
 
 export const learningTopics: LearningTopic[] = [
-  // Programming Languages
   {
     id: "javascript",
     title: "JavaScript",
@@ -73,7 +72,6 @@ export const learningTopics: LearningTopic[] = [
     keywords: ["java", "programming", "backend", "android", "enterprise"],
   },
 
-  // Mobile Development
   {
     id: "react-native",
     title: "React Native",
@@ -123,7 +121,6 @@ export const learningTopics: LearningTopic[] = [
     keywords: ["kotlin", "android", "mobile", "native", "google"],
   },
 
-  // Web Development
   {
     id: "react",
     title: "React",
@@ -173,7 +170,6 @@ export const learningTopics: LearningTopic[] = [
     keywords: ["nextjs", "react", "fullstack", "ssr", "web"],
   },
 
-  // Backend Development
   {
     id: "nodejs",
     title: "Node.js",
@@ -211,7 +207,6 @@ export const learningTopics: LearningTopic[] = [
     keywords: ["spring", "java", "backend", "enterprise", "microservices"],
   },
 
-  // Data Science & AI
   {
     id: "machine-learning",
     title: "Machine Learning",
@@ -255,7 +250,6 @@ export const learningTopics: LearningTopic[] = [
     ],
   },
 
-  // Design & UX
   {
     id: "ui-ux-design",
     title: "UI/UX Design",
@@ -281,7 +275,6 @@ export const learningTopics: LearningTopic[] = [
     keywords: ["figma", "design", "ui", "prototype", "collaboration"],
   },
 
-  // DevOps & Cloud
   {
     id: "docker",
     title: "Docker",
@@ -319,7 +312,6 @@ export const learningTopics: LearningTopic[] = [
     keywords: ["kubernetes", "k8s", "devops", "containers", "orchestration"],
   },
 
-  // Cybersecurity
   {
     id: "cybersecurity",
     title: "Cybersecurity",
@@ -333,7 +325,6 @@ export const learningTopics: LearningTopic[] = [
     keywords: ["cybersecurity", "security", "hacking", "network", "protection"],
   },
 
-  // Blockchain
   {
     id: "blockchain",
     title: "Blockchain & Web3",
@@ -368,12 +359,10 @@ export function filterTopics(
 ): LearningTopic[] {
   let filtered = topics;
 
-  // Filter by category
   if (selectedCategory !== "All") {
     filtered = filtered.filter((topic) => topic.category === selectedCategory);
   }
 
-  // Filter by search query
   if (searchQuery.trim()) {
     const query = searchQuery.toLowerCase().trim();
     filtered = filtered.filter(

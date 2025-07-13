@@ -48,7 +48,6 @@ export default function RoadmapPointScreen() {
   const pulseScale = useSharedValue(1);
 
   useEffect(() => {
-    // Gradient pulse animation
     pulseScale.value = withRepeat(
       withSequence(
         withTiming(1.02, { duration: 3000, easing: Easing.inOut(Easing.quad) }),
@@ -63,20 +62,19 @@ export default function RoadmapPointScreen() {
     transform: [{ scale: pulseScale.value }],
   }));
 
-  // Theme-aware gradient colors
   const gradientColors = isDarkColorScheme
     ? ([
-        "rgba(99, 102, 241, 0.15)", // Indigo
-        "rgba(168, 85, 247, 0.12)", // Purple
-        "rgba(236, 72, 153, 0.08)", // Pink
-        "rgba(59, 130, 246, 0.05)", // Blue
+        "rgba(99, 102, 241, 0.15)",
+        "rgba(168, 85, 247, 0.12)",
+        "rgba(236, 72, 153, 0.08)",
+        "rgba(59, 130, 246, 0.05)",
         "transparent",
       ] as const)
     : ([
-        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
-        "rgba(168, 85, 247, 0.02)", // Very subtle purple
-        "rgba(59, 130, 246, 0.02)", // Very subtle blue
-        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "rgba(99, 102, 241, 0.03)",
+        "rgba(168, 85, 247, 0.02)",
+        "rgba(59, 130, 246, 0.02)",
+        "rgba(236, 72, 153, 0.01)",
         "transparent",
       ] as const);
 
@@ -261,7 +259,7 @@ export default function RoadmapPointScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1" style={{ backgroundColor: '#000000' }}>
         <View className="px-6 py-4 border-b border-border bg-background">
           <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
@@ -292,7 +290,7 @@ export default function RoadmapPointScreen() {
 
   if (!point) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1" style={{ backgroundColor: '#000000' }}>
         <View className="flex-1 items-center justify-center">
           <Text className="text-xl font-bold text-foreground">
             Point not found
@@ -312,7 +310,6 @@ export default function RoadmapPointScreen() {
 
   return (
     <View className="flex-1">
-      {/* Theme-aware Animated Background Gradient */}
       <AnimatedLinearGradient
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
@@ -329,7 +326,7 @@ export default function RoadmapPointScreen() {
         ]}
       />
 
-      <SafeAreaView className="flex-1 bg-transparent">
+      <SafeAreaView className="flex-1" style={{ backgroundColor: '#000000' }}>
         <Animated.View style={[containerStyle, { flex: 1 }]}>
           <View className="px-6 py-4 border-b border-border bg-background">
             <View className="flex-row items-center justify-between mb-4">
@@ -508,17 +505,13 @@ function PlaylistCard({ playlist, index }: PlaylistCardProps) {
   const handlePress = async () => {
     try {
       if (playlist.videoUrl) {
-        // Normalize URL to ensure it has proper protocol
         let url = playlist.videoUrl.trim();
 
-        // Add https if no protocol is specified
         if (!url.match(/^https?:\/\//)) {
           url = `https://${url}`;
         }
 
-        // For YouTube URLs, try to use the YouTube app first, then fallback to browser
         if (url.includes("youtube.com") || url.includes("youtu.be")) {
-          // Try YouTube app first
           const youtubeAppUrl = url
             .replace("https://www.youtube.com", "vnd.youtube:")
             .replace("https://youtube.com", "vnd.youtube:")
@@ -535,7 +528,6 @@ function PlaylistCard({ playlist, index }: PlaylistCardProps) {
           }
         }
 
-        // Fallback to regular URL opening
         const supported = await Linking.canOpenURL(url);
         if (supported) {
           await Linking.openURL(url);

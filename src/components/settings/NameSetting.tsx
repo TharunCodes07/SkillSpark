@@ -23,14 +23,12 @@ export default function NameSetting() {
     loadName();
   }, []);
 
-  // Refresh data when component comes into focus
   useFocusEffect(
     React.useCallback(() => {
       loadName();
     }, [])
   );
 
-  // Refresh data when refresh is triggered
   useEffect(() => {
     loadName();
   }, [refreshTrigger]);
@@ -70,7 +68,6 @@ export default function NameSetting() {
           </Text>
           <Input
             value={tempName}
-            
             onChangeText={setTempName}
             placeholder="Enter your full name"
             className="mb-6"

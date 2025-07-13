@@ -30,13 +30,11 @@ export default function SkillsScreen() {
   const router = useRouter();
   const { isDarkColorScheme } = useColorScheme();
 
-  // Animation values
   const headerOpacity = useSharedValue(0);
   const headerTranslateY = useSharedValue(30);
   const pulseScale = useSharedValue(1);
 
   useEffect(() => {
-    // Animate header on mount
     const timer = setTimeout(() => {
       headerOpacity.value = withTiming(1, { duration: 600 });
       headerTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
@@ -46,7 +44,6 @@ export default function SkillsScreen() {
   }, []);
 
   useEffect(() => {
-    // Gradient pulse animation
     pulseScale.value = withRepeat(
       withSequence(
         withTiming(1.02, { duration: 3000, easing: Easing.inOut(Easing.quad) }),
@@ -61,24 +58,22 @@ export default function SkillsScreen() {
     transform: [{ scale: pulseScale.value }],
   }));
 
-  // Theme-aware gradient colors
   const gradientColors = isDarkColorScheme
     ? ([
-        "rgba(99, 102, 241, 0.15)", // Indigo
-        "rgba(168, 85, 247, 0.12)", // Purple
-        "rgba(236, 72, 153, 0.08)", // Pink
-        "rgba(59, 130, 246, 0.05)", // Blue
+        "rgba(99, 102, 241, 0.15)",
+        "rgba(168, 85, 247, 0.12)",
+        "rgba(236, 72, 153, 0.08)",
+        "rgba(59, 130, 246, 0.05)",
         "transparent",
       ] as const)
     : ([
-        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
-        "rgba(168, 85, 247, 0.02)", // Very subtle purple
-        "rgba(59, 130, 246, 0.02)", // Very subtle blue
-        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "rgba(99, 102, 241, 0.03)",
+        "rgba(168, 85, 247, 0.02)",
+        "rgba(59, 130, 246, 0.02)",
+        "rgba(236, 72, 153, 0.01)",
         "transparent",
       ] as const);
 
-  // Load roadmaps when screen focuses
   useFocusEffect(
     useCallback(() => {
       loadRoadmaps();
@@ -224,8 +219,8 @@ export default function SkillsScreen() {
           }
           ListHeaderComponent={
             <>
-              <Animated.View style={headerStyle} className="p-6 pb-2">
-                <Text className="text-3xl font-bold text-foreground pt-8 mb-2 ml-3">
+              <Animated.View style={headerStyle} className="p-3 pb-2">
+                <Text className="text-3xl font-bold text-foreground pt-4 mb-2 ml-3">
                   My Roadmaps
                 </Text>
                 <Text className="text-base text-muted-foreground mb-2 ml-4">

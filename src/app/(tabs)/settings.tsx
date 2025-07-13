@@ -26,7 +26,6 @@ export default function SettingsScreen() {
   const pulseScale = useSharedValue(1);
 
   useEffect(() => {
-    // Gradient pulse animation
     pulseScale.value = withRepeat(
       withSequence(
         withTiming(1.02, { duration: 3000, easing: Easing.inOut(Easing.quad) }),
@@ -41,27 +40,25 @@ export default function SettingsScreen() {
     transform: [{ scale: pulseScale.value }],
   }));
 
-  // Theme-aware gradient colors
   const gradientColors = isDarkColorScheme
     ? ([
-        "rgba(99, 102, 241, 0.15)", // Indigo
-        "rgba(168, 85, 247, 0.12)", // Purple
-        "rgba(236, 72, 153, 0.08)", // Pink
-        "rgba(59, 130, 246, 0.05)", // Blue
+        "rgba(99, 102, 241, 0.15)",
+        "rgba(168, 85, 247, 0.12)",
+        "rgba(236, 72, 153, 0.08)",
+        "rgba(59, 130, 246, 0.05)",
         "transparent",
       ] as const)
     : ([
-        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
-        "rgba(168, 85, 247, 0.02)", // Very subtle purple
-        "rgba(59, 130, 246, 0.02)", // Very subtle blue
-        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "rgba(99, 102, 241, 0.15)",
+        "rgba(168, 85, 247, 0.12)",
+        "rgba(236, 72, 153, 0.08)",
+        "rgba(59, 130, 246, 0.05)",
         "transparent",
       ] as const);
 
   return (
     <DataRefreshProvider>
       <View className="flex-1">
-        {/* Theme-aware Animated Background Gradient */}
         <AnimatedLinearGradient
           colors={gradientColors}
           start={{ x: 0, y: 0 }}
@@ -78,7 +75,7 @@ export default function SettingsScreen() {
           ]}
         />
 
-        <SafeAreaView className="flex-1 bg-transparent">
+        <SafeAreaView className="flex-1 bg-card">
           <ScrollView className="flex-1">
             <View className="bg-card px-6 pt-8 py-4 border-b border-border">
               <Text className="text-4xl font-bold text-foreground mt-3">

@@ -34,7 +34,7 @@ export default function HeroSection() {
   }));
 
   return (
-    <Animated.View style={animatedStyle} className="px-6 pt-8 pb-6">
+    <Animated.View style={animatedStyle} className="px-3 pt-8 pb-6">
       <View className="m-4">
         <Text className="text-5xl font-bold text-foreground mt-5 mb-3">
           Welcome to{"\n"}

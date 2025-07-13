@@ -56,17 +56,17 @@ export default function RoadmapDetailScreen() {
 
   const gradientColors = isDarkColorScheme
     ? ([
-        "rgba(99, 102, 241, 0.15)", // Indigo
-        "rgba(168, 85, 247, 0.12)", // Purple
-        "rgba(236, 72, 153, 0.08)", // Pink
-        "rgba(59, 130, 246, 0.05)", // Blue
+        "rgba(99, 102, 241, 0.15)",
+        "rgba(168, 85, 247, 0.12)",
+        "rgba(236, 72, 153, 0.08)",
+        "rgba(59, 130, 246, 0.05)",
         "transparent",
       ] as const)
     : ([
-        "rgba(99, 102, 241, 0.03)", // Very subtle indigo
-        "rgba(168, 85, 247, 0.02)", // Very subtle purple
-        "rgba(59, 130, 246, 0.02)", // Very subtle blue
-        "rgba(236, 72, 153, 0.01)", // Very subtle pink
+        "rgba(99, 102, 241, 0.03)",
+        "rgba(168, 85, 247, 0.02)",
+        "rgba(59, 130, 246, 0.02)",
+        "rgba(236, 72, 153, 0.01)",
         "transparent",
       ] as const);
 
@@ -87,7 +87,6 @@ export default function RoadmapDetailScreen() {
   const handlePointPress = async (point: RoadmapPoint) => {
     if (!roadmap) return;
 
-    // Set this roadmap as active and navigate to point detail
     try {
       await setActiveRoadmap(roadmap);
       router.push({
@@ -109,7 +108,6 @@ export default function RoadmapDetailScreen() {
 
     try {
       await updateRoadmapProgress(roadmap.id, point.id, !point.isCompleted);
-      // Reload roadmap to get updated progress
       await loadRoadmap();
     } catch (error) {
       console.error("Error updating progress:", error);
@@ -181,7 +179,6 @@ export default function RoadmapDetailScreen() {
 
   return (
     <View className="flex-1">
-      {/* Theme-aware Animated Background Gradient */}
       <AnimatedLinearGradient
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
@@ -200,7 +197,6 @@ export default function RoadmapDetailScreen() {
 
       <SafeAreaView className="flex-1 bg-transparent">
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Header */}
           <View className="p-6 pb-4">
             <TouchableOpacity
               onPress={() => router.back()}
@@ -231,7 +227,6 @@ export default function RoadmapDetailScreen() {
               </Text>
             </View>
 
-            {/* Progress Bar */}
             <View className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-3">
               <View
                 className="h-2 bg-primary rounded-full"
@@ -240,7 +235,6 @@ export default function RoadmapDetailScreen() {
             </View>
           </View>
 
-          {/* Roadmap Points */}
           <View className="px-6">
             <Text className="text-xl font-bold text-foreground mb-4">
               Learning Path

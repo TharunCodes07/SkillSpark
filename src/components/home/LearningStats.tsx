@@ -32,7 +32,6 @@ function StatsCard({
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    // Delay the animation to avoid state update during render
     const timer = setTimeout(() => {
       scale.value = withDelay(
         delay,
@@ -100,7 +99,6 @@ export default function LearningStats() {
       let totalCompletedPoints = 0;
       let totalPoints = 0;
 
-      // Safely handle roadmaps array
       if (Array.isArray(allRoadmaps)) {
         allRoadmaps.forEach((roadmap) => {
           if (roadmap && Array.isArray(roadmap.points)) {
@@ -122,7 +120,6 @@ export default function LearningStats() {
       });
     } catch (error) {
       console.error("Error loading stats:", error);
-      // Set safe defaults on error
       setStats({
         totalRoadmaps: 0,
         completedPoints: 0,
