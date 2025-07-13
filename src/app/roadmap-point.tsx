@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,6 +25,7 @@ import {
   PlaylistItem,
 } from "~/queries/roadmap-queries";
 import * as Linking from "expo-linking";
+import { openExternalLink } from "~/lib/utils/linkHandler";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -259,7 +267,7 @@ export default function RoadmapPointScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1" style={{ backgroundColor: '#000000' }}>
+      <SafeAreaView className="flex-1" style={{ backgroundColor: "#000000" }}>
         <View className="px-6 py-4 border-b border-border bg-background">
           <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
@@ -290,7 +298,7 @@ export default function RoadmapPointScreen() {
 
   if (!point) {
     return (
-      <SafeAreaView className="flex-1" style={{ backgroundColor: '#000000' }}>
+      <SafeAreaView className="flex-1" style={{ backgroundColor: "#000000" }}>
         <View className="flex-1 items-center justify-center">
           <Text className="text-xl font-bold text-foreground">
             Point not found
@@ -326,7 +334,7 @@ export default function RoadmapPointScreen() {
         ]}
       />
 
-      <SafeAreaView className="flex-1" style={{ backgroundColor: '#000000' }}>
+      <SafeAreaView className="flex-1" style={{ backgroundColor: "#000000" }}>
         <Animated.View style={[containerStyle, { flex: 1 }]}>
           <View className="px-6 py-4 border-b border-border bg-background">
             <View className="flex-row items-center justify-between mb-4">
@@ -505,39 +513,7 @@ function PlaylistCard({ playlist, index }: PlaylistCardProps) {
   const handlePress = async () => {
     try {
       if (playlist.videoUrl) {
-        let url = playlist.videoUrl.trim();
-
-        if (!url.match(/^https?:\/\//)) {
-          url = `https://${url}`;
-        }
-
-        if (url.includes("youtube.com") || url.includes("youtu.be")) {
-          const youtubeAppUrl = url
-            .replace("https://www.youtube.com", "vnd.youtube:")
-            .replace("https://youtube.com", "vnd.youtube:")
-            .replace("https://youtu.be/", "vnd.youtube:");
-
-          try {
-            const youtubeSupported = await Linking.canOpenURL(youtubeAppUrl);
-            if (youtubeSupported) {
-              await Linking.openURL(youtubeAppUrl);
-              return;
-            }
-          } catch (youtubeError) {
-            console.log("YouTube app not available, trying browser");
-          }
-        }
-
-        const supported = await Linking.canOpenURL(url);
-        if (supported) {
-          await Linking.openURL(url);
-        } else {
-          Alert.alert(
-            "Cannot Open Link",
-            "Unable to open this video link. Please make sure you have a web browser or YouTube app installed.",
-            [{ text: "OK", style: "default" }]
-          );
-        }
+        await openExternalLink(playlist.videoUrl);
       } else {
         Alert.alert("No Link", "Video link not available");
       }

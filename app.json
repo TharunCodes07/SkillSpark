@@ -44,23 +44,20 @@
               "scheme": "vnd.youtube"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
-      "softwareKeyboardLayoutMode": "pan"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": ["expo-router"],
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "8cd6d18c-447b-402d-b6c7-0a70596fea7a"
-      }
+    "softwareKeyboardLayoutMode": "pan"
+  },
+  "web": {
+    "favicon": "./assets/favicon.png"
+  },
+  "plugins": ["expo-router"],
+  "extra": {
+    "router": {},
+    "eas": {
+      "projectId": "8cd6d18c-447b-402d-b6c7-0a70596fea7a"
     }
   }
+}
