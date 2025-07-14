@@ -267,7 +267,7 @@ export default function RoadmapPointScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1" style={{ backgroundColor: "#000000" }}>
+      <SafeAreaView className="flex-1" style={{ backgroundColor: isDarkColorScheme ? "#000000" : "#ffffff" }}>
         <View className="px-6 py-4 border-b border-border bg-background">
           <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
@@ -298,7 +298,7 @@ export default function RoadmapPointScreen() {
 
   if (!point) {
     return (
-      <SafeAreaView className="flex-1" style={{ backgroundColor: "#000000" }}>
+      <SafeAreaView className="flex-1" style={{ backgroundColor: isDarkColorScheme ? "#000000" : "#ffffff" }}>
         <View className="flex-1 items-center justify-center">
           <Text className="text-xl font-bold text-foreground">
             Point not found
@@ -334,7 +334,7 @@ export default function RoadmapPointScreen() {
         ]}
       />
 
-      <SafeAreaView className="flex-1" style={{ backgroundColor: "#000000" }}>
+      <SafeAreaView className="flex-1" style={{ backgroundColor: isDarkColorScheme ? "#000000" : "#ffffff" }}>
         <Animated.View style={[containerStyle, { flex: 1 }]}>
           <View className="px-6 py-4 border-b border-border bg-background">
             <View className="flex-row items-center justify-between mb-4">
