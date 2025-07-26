@@ -395,7 +395,7 @@ export default function ActiveRoadmapDisplay({
               <View className="flex-row items-center">
                 <Icon name="Calendar" size={16} color="#6b7280" />
                 <Text className="text-xs text-muted-foreground ml-1">
-                  Created
+                  Created{" "}
                   {new Date(activeRoadmap.createdAt).toLocaleDateString()}
                 </Text>
               </View>

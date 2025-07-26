@@ -13,6 +13,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NAV_THEME } from "~/constants/constants";
 import { useColorScheme } from "~/lib/utils/useColorScheme";
 import { RoadmapDataProvider } from "~/lib/utils/RoadmapDataContext";
+import CustomSplashScreen from "~/components/ui/SplashScreen";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -29,6 +30,7 @@ export default function RootLayout() {
   const hasMounted = React.useRef(false);
   const { colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+  const [showSplash, setShowSplash] = React.useState(true);
 
   useIsomorphicLayoutEffect(() => {
     if (hasMounted.current) {
@@ -43,6 +45,10 @@ export default function RootLayout() {
 
   if (!isColorSchemeLoaded) {
     return null;
+  }
+
+  if (showSplash) {
+    return <CustomSplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
   return (
