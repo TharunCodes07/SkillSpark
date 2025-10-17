@@ -42,7 +42,7 @@ export interface Roadmap {
   };
 }
 
-const BASE = process.env.EXPO_PUBLIC_BACKEND_URL!;
+const BASE = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 async function getUserPreferencesWithDefaults(): Promise<UserPreferences> {
   try {
