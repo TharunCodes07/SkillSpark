@@ -47,6 +47,7 @@ import {
   QuizModal,
   QuizResultsModal,
   PerformanceChangeModal,
+  TopicAnalysisModal,
   isCUID,
   type ContentVersion,
 } from '@/components/topic';
@@ -87,6 +88,7 @@ export default function TopicDetailScreen() {
   const [showQuizResults, setShowQuizResults] = useState(false);
   const [showExitQuizModal, setShowExitQuizModal] = useState(false);
   const [showPerformanceChangeModal, setShowPerformanceChangeModal] = useState(false);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   
   const [isBestPracticesExpanded, setIsBestPracticesExpanded] = useState(false);
   const [isCommonPitfallsExpanded, setIsCommonPitfallsExpanded] = useState(false);
@@ -262,7 +264,7 @@ export default function TopicDetailScreen() {
   }, [quizError]);
   
   const handleAnalyze = () => {
-    setSuccessMessage('Topic analysis feature coming soon! This will provide insights into your learning progress.');
+    setShowAnalysisModal(true);
   };
   
   const handleQuizComplete = () => {
@@ -785,6 +787,14 @@ export default function TopicDetailScreen() {
         isDarkColorScheme={isDarkColorScheme}
         onYes={handleRegenerateFromQuiz}
         onNo={handleSkipRegenerate}
+      />
+
+      <TopicAnalysisModal
+        visible={showAnalysisModal}
+        isDarkColorScheme={isDarkColorScheme}
+        topicName={topic.name}
+        subtopicPerformance={subtopicPerformance}
+        onClose={() => setShowAnalysisModal(false)}
       />
     </SafeAreaView>
   );
