@@ -463,9 +463,9 @@ export default function Home() {
               <View className="p-5">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center">
-                    <View className="h-10 w-10 rounded-xl bg-primary/10 items-center justify-center mr-3">
+                    {/* <View className="h-10 w-10 rounded-xl bg-primary/10 items-center justify-center mr-3">
                       <Award size={20} className="text-primary" />
-                    </View>
+                    </View> */}
                     <View>
                       <Text className="text-sm font-medium text-muted-foreground">Your Progress</Text>
                       <Text className="text-lg font-bold text-foreground">
