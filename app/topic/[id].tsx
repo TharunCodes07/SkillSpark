@@ -15,6 +15,7 @@ import { useCurrentUserId } from '@/hooks/stores/useUserStore';
 import { useIsEmotionDetectionEnabled } from '@/hooks/stores/useEmotionStore';
 import { useIsGeneratedVideosEnabled } from '@/hooks/stores/useGeneratedVideosStore';
 import { useTopicDetail, usePersistTopicContent, useRegenerateSingleTone, useGenerateWebSearchContent, useRegenerateSelectedSubtopics } from '@/hooks/queries/useTopicQueries';
+import { checkNeedsRegeneration, setNeedsRegeneration } from '@/server/queries/topics';
 import { useQuizWorkflow } from '@/hooks/queries/useQuizWorkflow';
 import type { TopicExplanation } from '@/lib/gemini';
 import { searchTopicUpdates } from '@/lib/webSearchService';
@@ -89,6 +90,7 @@ export default function TopicDetailScreen() {
   const [showExitQuizModal, setShowExitQuizModal] = useState(false);
   const [showPerformanceChangeModal, setShowPerformanceChangeModal] = useState(false);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [isCheckingRegeneration, setIsCheckingRegeneration] = useState(true);
   
   const [isBestPracticesExpanded, setIsBestPracticesExpanded] = useState(false);
   const [isCommonPitfallsExpanded, setIsCommonPitfallsExpanded] = useState(false);
@@ -118,7 +120,7 @@ export default function TopicDetailScreen() {
     isFetching,
     error,
     refetch 
-  } = useTopicDetail(id, currentUserId || undefined);
+  } = useTopicDetail(id, currentUserId || undefined, !isCheckingRegeneration);
 
   const persistContentMutation = usePersistTopicContent();
   const regenerateToneMutation = useRegenerateSingleTone();
@@ -128,6 +130,35 @@ export default function TopicDetailScreen() {
   const { isGenerating: isGeneratingQuiz, quizId, error: quizError, initiateQuiz, reset: resetQuizWorkflow } = useQuizWorkflow();
 
   const isRegenerating = isFetching && !isLoading;
+
+  // Check if regeneration is needed on page load (after returning from quiz)
+  useEffect(() => {
+    const checkRegeneration = async () => {
+      if (!id || !currentUserId) return;
+      
+      try {
+        const needsRegen = await checkNeedsRegeneration(currentUserId, id);
+        
+        if (needsRegen) {
+          console.log('🔔 Regeneration needed - showing confirmation modal');
+          // Show modal to ask user if they want to regenerate
+          setShowPerformanceChangeModal(true);
+          // Keep query disabled - wait for user confirmation
+          setIsCheckingRegeneration(false);
+        } else {
+          // No regeneration needed, allow query to run normally
+          console.log('✅ No regeneration needed - loading content');
+          setIsCheckingRegeneration(false);
+        }
+      } catch (error) {
+        console.error('Failed to check regeneration status:', error);
+        // On error, allow query to run normally
+        setIsCheckingRegeneration(false);
+      }
+    };
+    
+    checkRegeneration();
+  }, [id, currentUserId]);
 
   const explanation = useMemo(() => {
     if (!currentTopicDetail) return null;
@@ -275,15 +306,28 @@ export default function TopicDetailScreen() {
     setShowPerformanceChangeModal(true);
   };
 
-  const handleRegenerateFromQuiz = () => {
+  const handleRegenerateFromQuiz = async () => {
     setShowPerformanceChangeModal(false);
+    console.log('✅ User confirmed regeneration - refetching content');
     // Refetch to get the regenerated content based on quiz performance
-    refetch();
+    await refetch();
   };
 
-  const handleSkipRegenerate = () => {
+  const handleSkipRegenerate = async () => {
     setShowPerformanceChangeModal(false);
-    // Just close the modal without regenerating
+    // Clear the regeneration flag so it doesn't show again
+    if (id && currentUserId) {
+      try {
+        await setNeedsRegeneration(currentUserId, id, false);
+        console.log('✅ User skipped regeneration - cleared flag');
+        // Now refetch to load existing content without regeneration
+        await refetch();
+      } catch (error) {
+        console.error('Failed to clear regeneration flag:', error);
+        // Still try to load content even if flag clear failed
+        await refetch();
+      }
+    }
   };
 
   const handleWebSearch = async () => {
@@ -465,6 +509,19 @@ export default function TopicDetailScreen() {
       </Pressable>
     </View>
   );
+
+  // Show loading while checking if regeneration is needed
+  if (isCheckingRegeneration) {
+    return (
+      <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+        <Stack.Screen options={{ headerShown: false, animation: 'fade', animationDuration: 150 }} />
+        <BackButton />
+        <ScrollView className="flex-1">
+          <TopicDetailSkeleton />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading) {
     return (

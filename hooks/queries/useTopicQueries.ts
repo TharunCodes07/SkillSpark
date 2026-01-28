@@ -49,12 +49,12 @@ export interface TopicDetail {
  * Hook to fetch complete topic details with adaptive explanations
  * This combines topic data, subtopics, and generates AI explanations
  */
-export function useTopicDetail(topicId: string | undefined, userId: string | undefined) {
+export function useTopicDetail(topicId: string | undefined, userId: string | undefined, enabled: boolean = true) {
   const queryClient = useQueryClient();
   
   return useQuery({
-    queryKey: queryKeys.
-    topics.detail(topicId || '', userId || ''),
+    queryKey: queryKeys.topics.detail(topicId || '', userId || ''),
+    enabled: enabled && !!topicId && !!userId,
     queryFn: async (): Promise<TopicDetail> => {
       if (!topicId || !userId) {
         throw new Error('Topic ID and User ID are required');
