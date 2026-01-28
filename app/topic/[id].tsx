@@ -46,6 +46,7 @@ import {
   RegeneratingOverlay,
   QuizModal,
   QuizResultsModal,
+  PerformanceChangeModal,
   isCUID,
   type ContentVersion,
 } from '@/components/topic';
@@ -85,6 +86,7 @@ export default function TopicDetailScreen() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showQuizResults, setShowQuizResults] = useState(false);
   const [showExitQuizModal, setShowExitQuizModal] = useState(false);
+  const [showPerformanceChangeModal, setShowPerformanceChangeModal] = useState(false);
   
   const [isBestPracticesExpanded, setIsBestPracticesExpanded] = useState(false);
   const [isCommonPitfallsExpanded, setIsCommonPitfallsExpanded] = useState(false);
@@ -267,7 +269,19 @@ export default function TopicDetailScreen() {
     setShowQuiz(false);
     setShowQuizResults(false);
     resetQuizWorkflow();
+    // Show modal to ask if user wants to regenerate content
+    setShowPerformanceChangeModal(true);
+  };
+
+  const handleRegenerateFromQuiz = () => {
+    setShowPerformanceChangeModal(false);
+    // Refetch to get the regenerated content based on quiz performance
     refetch();
+  };
+
+  const handleSkipRegenerate = () => {
+    setShowPerformanceChangeModal(false);
+    // Just close the modal without regenerating
   };
 
   const handleWebSearch = async () => {
@@ -764,6 +778,13 @@ export default function TopicDetailScreen() {
           setShowQuiz(false);
         }}
         onContinue={() => setShowExitQuizModal(false)}
+      />
+
+      <PerformanceChangeModal
+        visible={showPerformanceChangeModal}
+        isDarkColorScheme={isDarkColorScheme}
+        onYes={handleRegenerateFromQuiz}
+        onNo={handleSkipRegenerate}
       />
     </SafeAreaView>
   );

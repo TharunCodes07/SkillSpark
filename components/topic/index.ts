@@ -15,3 +15,4 @@ export * from './TopicDetailSkeleton';
 export * from './TopicSearchResultsModal';
 export * from './TopicVideoGenerator';
 export * from './ToneSwitcher';
+export * from './PerformanceChangeModal';
