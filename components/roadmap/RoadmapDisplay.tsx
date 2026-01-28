@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import { APIKeyRequiredDialog } from '@/components/ui/api-key-required-dialog';
-import { LoadingAnimation } from '@/components/ui/loading-animation';
+// import { LoadingAnimation } from '@/components/ui/loading-animation';
 import { RoadmapDetailSkeleton } from '@/components/roadmap/RoadmapDetailSkeleton';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Progress } from '@/components/ui/progress';
@@ -44,6 +44,8 @@ import {
 } from 'lucide-react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { cn } from '@/lib/utils';
+
+import { LoadingAnimation } from '@/components/ui/loading-animation';
 
 // Component to render markdown text with clickable links
 function MarkdownText({ text }: { text: string }) {
@@ -783,7 +785,7 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
         transparent
         visible={showSearchUpdateModal}
         animationType="none"
-        onRequestClose={() => setShowSearchUpdateModal(false)}
+        onRequestClose={() => !isLoadingUpdates && setShowSearchUpdateModal(false)}
         statusBarTranslucent
       >
         <Animated.View
@@ -794,7 +796,7 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
         >
           <Pressable 
             className="absolute inset-0" 
-            onPress={() => setShowSearchUpdateModal(false)}
+            onPress={() => !isLoadingUpdates && setShowSearchUpdateModal(false)}
           />
           
           <Animated.View
@@ -808,90 +810,104 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
               elevation: 10,
             }}
           >
-            <View className="p-6">
-              <View className="flex-row items-center justify-between mb-4">
-                <View className="flex-row items-center gap-2 flex-1 mr-2">
-                  <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
-                    <RefreshCw size={24} className="text-primary" />
+            {isLoadingUpdates ? (
+              <View className="p-6">
+                <LoadingAnimation 
+                  title="Checking for Updates"
+                  messages={[
+                    'Analyzing your completed topics...',
+                    'Searching for new information...',
+                    'Finding relevant updates...',
+                    'Almost ready...'
+                  ]}
+                />
+              </View>
+            ) : (
+              <View className="p-6">
+                <View className="flex-row items-center justify-between mb-4">
+                  <View className="flex-row items-center gap-2 flex-1 mr-2">
+                    <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
+                      <RefreshCw size={24} className="text-primary" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-xl font-bold text-foreground">
+                        Check for Updates
+                      </Text>
+                      <Text className="text-sm text-muted-foreground mt-0.5">
+                        Choose which topics to check
+                      </Text>
+                    </View>
                   </View>
-                  <View className="flex-1">
-                    <Text className="text-xl font-bold text-foreground">
-                      Check for Updates
-                    </Text>
-                    <Text className="text-sm text-muted-foreground mt-0.5">
-                      Choose which topics to check
-                    </Text>
-                  </View>
+                  <Pressable
+                    onPress={() => setShowSearchUpdateModal(false)}
+                    className="h-8 w-8 items-center justify-center rounded-lg active:bg-secondary flex-shrink-0"
+                  >
+                    <X size={20} className="text-muted-foreground" />
+                  </Pressable>
                 </View>
+
+                <View className="gap-3 mb-6">
+                  <Pressable
+                    onPress={async () => {
+                      setSearchUpdateType('completed');
+                      await handleRefreshUpdates();
+                    }}
+                    disabled={completedSteps === 0}
+                    className={cn(
+                      "p-4 rounded-xl border-2 active:opacity-70",
+                      completedSteps === 0 
+                        ? "bg-secondary/50 border-border opacity-50" 
+                        : "bg-card border-primary/20"
+                    )}
+                  >
+                    <View className="flex-row items-center gap-3">
+                      <View className="h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
+                        <CheckCircle size={20} className="text-green-700 dark:text-green-400" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-base font-semibold text-foreground">
+                          Completed Topics Only
+                        </Text>
+                        <Text className="text-sm text-muted-foreground mt-0.5">
+                          Check for updates in topics you've completed
+                        </Text>
+                      </View>
+                    </View>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={async () => {
+                      setSearchUpdateType('all');
+                      await handleWebSearch();
+                    }}
+                    className="p-4 rounded-xl border-2 bg-card border-primary/20 active:opacity-70"
+                  >
+                    <View className="flex-row items-center gap-3">
+                      <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950">
+                        <Search size={20} className="text-blue-700 dark:text-blue-400" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-base font-semibold text-foreground">
+                          All Topics
+                        </Text>
+                        <Text className="text-sm text-muted-foreground mt-0.5">
+                          Search for updates across all topics
+                        </Text>
+                      </View>
+                    </View>
+                  </Pressable>
+                </View>
+
                 <Pressable
                   onPress={() => setShowSearchUpdateModal(false)}
-                  className="h-8 w-8 items-center justify-center rounded-lg active:bg-secondary flex-shrink-0"
+                  className="w-full h-12 items-center justify-center rounded-lg bg-secondary active:bg-secondary/70"
                 >
-                  <X size={20} className="text-muted-foreground" />
+                  <Text className="text-base font-medium text-foreground">
+                    Cancel
+                  </Text>
                 </Pressable>
               </View>
-
-              <View className="gap-3 mb-6">
-                <Pressable
-                  onPress={() => {
-                    setShowSearchUpdateModal(false);
-                    handleShowUpdates();
-                  }}
-                  disabled={completedSteps === 0}
-                  className={cn(
-                    "p-4 rounded-xl border-2 active:opacity-70",
-                    completedSteps === 0 
-                      ? "bg-secondary/50 border-border opacity-50" 
-                      : "bg-card border-primary/20"
-                  )}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
-                      <CheckCircle size={20} className="text-green-700 dark:text-green-400" />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-base font-semibold text-foreground">
-                        Completed Topics Only
-                      </Text>
-                      <Text className="text-sm text-muted-foreground mt-0.5">
-                        Check for updates in topics you've completed
-                      </Text>
-                    </View>
-                  </View>
-                </Pressable>
-
-                <Pressable
-                  onPress={async () => {
-                    setShowSearchUpdateModal(false);
-                    await handleWebSearch();
-                  }}
-                  className="p-4 rounded-xl border-2 bg-card border-primary/20 active:opacity-70"
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950">
-                      <Search size={20} className="text-blue-700 dark:text-blue-400" />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-base font-semibold text-foreground">
-                        All Topics
-                      </Text>
-                      <Text className="text-sm text-muted-foreground mt-0.5">
-                        Search for updates across all topics
-                      </Text>
-                    </View>
-                  </View>
-                </Pressable>
-              </View>
-
-              <Pressable
-                onPress={() => setShowSearchUpdateModal(false)}
-                className="w-full h-12 items-center justify-center rounded-lg bg-secondary active:bg-secondary/70"
-              >
-                <Text className="text-base font-medium text-foreground">
-                  Cancel
-                </Text>
-              </Pressable>
-            </View>
+            )}
           </Animated.View>
         </Animated.View>
       </Modal>

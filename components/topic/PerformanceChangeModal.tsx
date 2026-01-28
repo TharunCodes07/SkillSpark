@@ -71,21 +71,21 @@ export function PerformanceChangeModal({
               style={{ backgroundColor: isDarkColorScheme ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.05)' }}
             >
               <Text className="text-xs text-muted-foreground mb-1">
-                ✨ Personalized learning material
+                 Personalized learning material
               </Text>
               <Text className="text-xs text-muted-foreground mb-1">
-                🎯 Focus on your weak areas
+                 Focus on your weak areas
               </Text>
               <Text className="text-xs text-muted-foreground">
-                🚀 Adapted to your level
+                 Adapted to your level
               </Text>
             </View>
 
             {/* Action Buttons */}
-            <View className="space-y-3">
+            <View className="space-y-3 ">
               <Pressable
                 onPress={onYes}
-                className="w-full h-12 items-center justify-center rounded-lg active:opacity-90"
+                className="w-full h-12 items-center justify-center rounded-lg active:opacity-90 mb-2"
                 style={{ backgroundColor: isDarkColorScheme ? '#6366f1' : '#4f46e5' }}
               >
                 <Text className="text-base font-semibold text-white">

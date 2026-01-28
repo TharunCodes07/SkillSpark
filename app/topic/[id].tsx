@@ -91,6 +91,7 @@ export default function TopicDetailScreen() {
   const [showPerformanceChangeModal, setShowPerformanceChangeModal] = useState(false);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [isCheckingRegeneration, setIsCheckingRegeneration] = useState(true);
+  const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   
   const [isBestPracticesExpanded, setIsBestPracticesExpanded] = useState(false);
   const [isCommonPitfallsExpanded, setIsCommonPitfallsExpanded] = useState(false);
@@ -164,6 +165,19 @@ export default function TopicDetailScreen() {
     if (!currentTopicDetail) return null;
     return currentTopicDetail.explanation;
   }, [currentTopicDetail]);
+
+  // Create subtopic names map - MUST be called unconditionally (before any returns)
+  const subtopicNames = useMemo(() => {
+    const map = new Map<string, string>();
+    if (explanation?.subtopics) {
+      explanation.subtopics.forEach(st => {
+        if (st.id) {
+          map.set(st.id, st.title);
+        }
+      });
+    }
+    return map;
+  }, [explanation]);
 
   useEffect(() => {
     if (id) {
@@ -820,13 +834,17 @@ export default function TopicDetailScreen() {
       
       <QuizResultsModal
         visible={showQuizResults}
-        quizId={quizId}
+        quizId={selectedQuizId || quizId}
         userId={currentUserId || ''}
         topicName={topic.name}
         isDarkColorScheme={isDarkColorScheme}
         onClose={() => {
           setShowQuizResults(false);
-          handleQuizComplete();
+          setSelectedQuizId(null);
+          // Only call handleQuizComplete if we just completed a quiz (not viewing history)
+          if (!selectedQuizId) {
+            handleQuizComplete();
+          }
         }}
       />
       
@@ -849,9 +867,17 @@ export default function TopicDetailScreen() {
       <TopicAnalysisModal
         visible={showAnalysisModal}
         isDarkColorScheme={isDarkColorScheme}
+        topicId={id}
         topicName={topic.name}
+        userId={currentUserId || ''}
         subtopicPerformance={subtopicPerformance}
+        subtopicNames={subtopicNames}
         onClose={() => setShowAnalysisModal(false)}
+        onViewQuizResults={(quizId) => {
+          setSelectedQuizId(quizId);
+          setShowAnalysisModal(false);
+          setShowQuizResults(true);
+        }}
       />
     </SafeAreaView>
   );

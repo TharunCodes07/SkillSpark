@@ -12,7 +12,8 @@ import {
   submitQuizAttempt,
   updateStepCompletion,
   getCompletedTopicsForUpdates,
-  getCategorizedRoadmaps
+  getCategorizedRoadmaps,
+  getTopicQuizAttempts
 } from '@/server/queries/roadmaps';
 import { getSubtopics, createSubtopics } from '@/server/queries/topics';
 import { geminiService, type KnowledgeGraph } from '@/lib/gemini';
@@ -72,6 +73,18 @@ export function useQuiz(quizId: string | undefined) {
     queryFn: () => getQuizWithQuestions(quizId!),
     enabled: !!quizId,
     staleTime: 10 * 60 * 1000, // Fresh for 10 minutes (quiz content rarely changes)
+  });
+}
+
+/**
+ * Hook to fetch all quiz attempts for a topic by a user
+ */
+export function useTopicQuizAttempts(topicId: string | undefined, userId: string | undefined) {
+  return useQuery({
+    queryKey: [...queryKeys.topics.detail(topicId || '', userId || ''), 'quiz-attempts'],
+    queryFn: () => getTopicQuizAttempts(userId!, topicId!),
+    enabled: !!topicId && !!userId,
+    staleTime: 1 * 60 * 1000, // Fresh for 1 minute (quiz attempts can change frequently)
   });
 }
 

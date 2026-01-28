@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Pressable, ActivityIndicator } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Search, MessageSquare } from 'lucide-react-native';
+import { LoadingAnimation } from '@/components/ui/loading-animation';
 
 interface TopicActionButtonsProps {
   isSearching: boolean;
@@ -18,11 +19,26 @@ export function TopicActionButtons({
   onSearch,
   onToggleAskDoubtMode,
 }: TopicActionButtonsProps) {
+  if (isSearching) {
+    return (
+      <View className="mb-4">
+        <LoadingAnimation 
+          title="Searching for Updates"
+          messages={[
+            'Searching the web for latest information...',
+            'Analyzing new developments...',
+            'Finding relevant updates...',
+            'Almost done...'
+          ]}
+        />
+      </View>
+    );
+  }
+
   return (
     <View className="flex-row items-center gap-2 mb-4">
       <Pressable
         onPress={onSearch}
-        disabled={isSearching}
         style={{
           flex: 1,
           flexDirection: 'row',
@@ -34,24 +50,12 @@ export function TopicActionButtons({
           borderWidth: 1,
           borderColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7',
           backgroundColor: isDarkColorScheme ? '#27272a' : '#ffffff',
-          opacity: isSearching ? 0.7 : 1,
         }}
       >
-        {isSearching ? (
-          <>
-            <ActivityIndicator size="small" color={isDarkColorScheme ? '#6366f1' : '#4f46e5'} />
-            <Text style={{ fontSize: 13, fontWeight: '500', color: isDarkColorScheme ? '#fafafa' : '#18181b' }}>
-              Searching...
-            </Text>
-          </>
-        ) : (
-          <>
-            <Search size={16} color={isDarkColorScheme ? '#a1a1aa' : '#52525b'} />
-            <Text style={{ fontSize: 13, fontWeight: '500', color: isDarkColorScheme ? '#fafafa' : '#18181b' }}>
-              Search Updates
-            </Text>
-          </>
-        )}
+        <Search size={16} color={isDarkColorScheme ? '#a1a1aa' : '#52525b'} />
+        <Text style={{ fontSize: 13, fontWeight: '500', color: isDarkColorScheme ? '#fafafa' : '#18181b' }}>
+          Search Updates
+        </Text>
       </Pressable>
       
       <Pressable

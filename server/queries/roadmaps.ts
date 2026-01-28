@@ -857,7 +857,8 @@ export async function submitQuizAttempt(
       quizId,
       score,
       passed,
-      details: details // Don't stringify - Drizzle handles it with mode: "json"
+      details: details, // Don't stringify - Drizzle handles it with mode: "json"
+      completedAt: new Date() // Explicitly set to ensure proper Date object
     });
 
     // Update user knowledge if passed
@@ -1440,4 +1441,113 @@ export async function getCompletedTopicsForUpdates(
       name: step.topicName!,
       completedDate: step.lastCompletedAt!,
     }));
+}
+
+/**
+ * Get all quiz attempts for a specific topic by a user
+ */
+export async function getTopicQuizAttempts(
+  userId: string,
+  topicId: string
+): Promise<Array<{
+  quizId: string;
+  quizTitle: string | null;
+  scorePercentage: number; // Score as percentage (0-100)
+  correctCount: number; // Calculated correct answers
+  passed: boolean;
+  totalQuestions: number;
+  completedAt: Date;
+}>> {
+  const attempts = await db
+    .select({
+      quizId: quizAttempts.quizId,
+      quizTitle: quizzes.title,
+      score: quizAttempts.score, // This is stored as percentage (0-100)
+      passed: quizAttempts.passed,
+      completedAt: quizAttempts.completedAt,
+    })
+    .from(quizAttempts)
+    .innerJoin(quizzes, eq(quizAttempts.quizId, quizzes.id))
+    .where(and(
+      eq(quizAttempts.userId, userId),
+      eq(quizzes.topicId, topicId)
+    ))
+    .orderBy(desc(quizAttempts.completedAt));
+
+  // Get question counts for each quiz
+  const result = await Promise.all(
+    attempts.map(async (attempt) => {
+      const questionCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(questions)
+        .where(eq(questions.quizId, attempt.quizId));
+
+      const totalQuestions = Number(questionCount[0]?.count || 0);
+      const rawScore = attempt.score || 0;
+      
+      // Determine if score is percentage or raw count
+      // If score > totalQuestions, it's definitely a percentage (0-100)
+      // If score <= totalQuestions and score <= 100, could be either
+      // Heuristic: if score > totalQuestions, treat as percentage
+      //            if score <= totalQuestions, treat as raw correct count
+      let scorePercentage: number;
+      let correctCount: number;
+      
+      if (totalQuestions > 0) {
+        if (rawScore > totalQuestions) {
+          // Score is a percentage (e.g., 75 for 75%)
+          scorePercentage = Math.min(100, rawScore);
+          correctCount = Math.round((scorePercentage / 100) * totalQuestions);
+        } else {
+          // Score is raw correct count (e.g., 6 out of 18)
+          correctCount = rawScore;
+          scorePercentage = Math.round((correctCount / totalQuestions) * 100);
+        }
+      } else {
+        scorePercentage = 0;
+        correctCount = 0;
+      }
+
+      console.log('📊 Quiz Attempt Processing:', {
+        quizId: attempt.quizId,
+        rawScore,
+        totalQuestions,
+        scorePercentage,
+        correctCount,
+        rawCompletedAt: attempt.completedAt,
+        completedAtType: typeof attempt.completedAt,
+      });
+
+      // Handle completedAt - SQLite CURRENT_TIMESTAMP stores as text string
+      // Need to parse it properly whether it's a Date, number, or string
+      let parsedDate: Date;
+      if (attempt.completedAt instanceof Date && !isNaN(attempt.completedAt.getTime())) {
+        parsedDate = attempt.completedAt;
+      } else if (typeof attempt.completedAt === 'string') {
+        // SQLite CURRENT_TIMESTAMP format: "2026-01-29 05:50:11"
+        parsedDate = new Date(attempt.completedAt.replace(' ', 'T') + 'Z');
+      } else if (typeof attempt.completedAt === 'number') {
+        parsedDate = new Date(attempt.completedAt);
+      } else {
+        parsedDate = new Date();
+      }
+
+      console.log('📅 Parsed Date:', { 
+        parsedDate: parsedDate.toISOString(), 
+        isValidDate: !isNaN(parsedDate.getTime()) 
+      });
+
+      return {
+        quizId: attempt.quizId,
+        quizTitle: attempt.quizTitle,
+        scorePercentage, // The percentage score (0-100)
+        correctCount, // Calculated number of correct answers
+        passed: attempt.passed || false,
+        totalQuestions,
+        completedAt: parsedDate,
+      };
+    })
+  );
+
+  return result;
 }
