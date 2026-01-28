@@ -369,7 +369,7 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
             newLevel: result.newLevel,
             oldLevel: result.oldLevel,
             xpGained: result.xpGained,
-            action: result.action || (step.isCompleted ? 'Marked incomplete' : 'Completed step!'),
+            action: step.isCompleted ? 'Marked incomplete' : 'Completed step!',
             oldXP: (result as any).oldXP,
             newXP: (result as any).newXP,
           });
@@ -380,7 +380,7 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
               newLevel: result.newLevel,
               oldLevel: result.oldLevel,
               xpGained: result.xpGained,
-              action: result.action || (step.isCompleted ? 'Marked incomplete' : 'Completed step!'),
+              action: step.isCompleted ? 'Marked incomplete' : 'Completed step!',
               oldXP: (result as any).oldXP,
               newXP: (result as any).newXP,
             });
@@ -978,7 +978,6 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
       {/* Topic Updates Bottom Sheet */}
       <BottomSheet 
         ref={updatesSheetRef}
-        onDismiss={() => setIsUpdatesSheetVisible(false)}
       >
         <TopicUpdatesModal
           visible={isUpdatesSheetVisible}
@@ -997,7 +996,6 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
       {/* Web Search Results Modal */}
       <BottomSheet 
         ref={webSearchSheetRef}
-        onDismiss={() => setIsWebSearchSheetVisible(false)}
       >
         <WebSearchResultsModal
           sheetRef={webSearchSheetRef}
@@ -1352,9 +1350,17 @@ export function RoadmapDisplay({ roadmapId, onTakeQuiz, onViewResults, onRevisio
             onPress={() => setShowSearchUpdateModal(true)}
             disabled={isSearching || checkTopicUpdatesMutation.isPending}
             className="flex-1 h-11 flex-row items-center justify-center gap-2 rounded-lg bg-card border border-border active:bg-secondary"
+            style={{
+              opacity: isSearching || checkTopicUpdatesMutation.isPending ? 0.7 : 1,
+            }}
           >
             {isSearching || checkTopicUpdatesMutation.isPending ? (
-              <ActivityIndicator size="small" className="text-foreground" />
+              <>
+                <ActivityIndicator size="small" color="#6366f1" />
+                <Text className="text-sm font-medium text-foreground">
+                  Loading...
+                </Text>
+              </>
             ) : (
               <>
                 <RefreshCw size={18} className="text-foreground" />

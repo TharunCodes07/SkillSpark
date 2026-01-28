@@ -4,6 +4,7 @@ import { Search, ExternalLink, RefreshCw } from 'lucide-react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useColorScheme } from '@/lib/useColorScheme';
 import MarkdownText from '@/components/ui/MarkdownText';
+import { LoadingAnimation } from '@/components/ui/loading-animation';
 import {
   BottomSheetContent,
   BottomSheetHeader,
@@ -116,41 +117,18 @@ export function TopicSearchResultsModal({
         </View>
       </BottomSheetHeader>
 
-      {isSearching && results.length === 0 ? (
+      {(isSearching || isRefreshing) && results.length === 0 ? (
         <BottomSheetView hadHeader={true}>
-          <View className="px-4">
-            {[1, 2, 3].map((i) => (
-              <View 
-                key={i} 
-                className="mb-3 rounded-lg p-3 border"
-                style={{
-                  backgroundColor: isDarkColorScheme ? 'rgba(63, 63, 70, 0.5)' : 'rgba(244, 244, 245, 0.5)',
-                  borderColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7',
-                }}
-              >
-                <View 
-                  className="h-4 rounded mb-2" 
-                  style={{ 
-                    width: '75%', 
-                    backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' 
-                  }} 
-                />
-                <View 
-                  className="h-4 rounded mb-2" 
-                  style={{ 
-                    width: '100%', 
-                    backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' 
-                  }} 
-                />
-                <View 
-                  className="h-4 rounded" 
-                  style={{ 
-                    width: '50%', 
-                    backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' 
-                  }} 
-                />
-              </View>
-            ))}
+          <View className="flex-1 items-center justify-center py-12">
+            <LoadingAnimation 
+              title="Searching..."
+              messages={[
+                'Searching the web for updates...',
+                'Finding latest information...',
+                'Analyzing results...',
+                'Almost done...'
+              ]}
+            />
           </View>
         </BottomSheetView>
       ) : results.length === 0 ? (

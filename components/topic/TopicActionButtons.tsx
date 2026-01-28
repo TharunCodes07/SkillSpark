@@ -34,17 +34,24 @@ export function TopicActionButtons({
           borderWidth: 1,
           borderColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7',
           backgroundColor: isDarkColorScheme ? '#27272a' : '#ffffff',
-          opacity: isSearching ? 0.6 : 1,
+          opacity: isSearching ? 0.7 : 1,
         }}
       >
         {isSearching ? (
-          <ActivityIndicator size="small" color={isDarkColorScheme ? '#a1a1aa' : '#52525b'} />
+          <>
+            <ActivityIndicator size="small" color={isDarkColorScheme ? '#6366f1' : '#4f46e5'} />
+            <Text style={{ fontSize: 13, fontWeight: '500', color: isDarkColorScheme ? '#fafafa' : '#18181b' }}>
+              Searching...
+            </Text>
+          </>
         ) : (
-          <Search size={16} color={isDarkColorScheme ? '#a1a1aa' : '#52525b'} />
+          <>
+            <Search size={16} color={isDarkColorScheme ? '#a1a1aa' : '#52525b'} />
+            <Text style={{ fontSize: 13, fontWeight: '500', color: isDarkColorScheme ? '#fafafa' : '#18181b' }}>
+              Search Updates
+            </Text>
+          </>
         )}
-        <Text style={{ fontSize: 13, fontWeight: '500', color: isDarkColorScheme ? '#fafafa' : '#18181b' }}>
-          {isSearching ? 'Searching...' : 'Search Updates'}
-        </Text>
       </Pressable>
       
       <Pressable

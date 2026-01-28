@@ -2,8 +2,8 @@ import type { ConfigContext, ExpoConfig } from "@expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "SkillSpark",
-  slug: "skillspark",
+  name: "skillspark-2",
+  slug: "skillspark-2",
   newArchEnabled: true,
   version: "1.0.0",
   orientation: "portrait",

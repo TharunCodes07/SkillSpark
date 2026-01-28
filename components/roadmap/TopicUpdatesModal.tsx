@@ -5,6 +5,7 @@ import { getItem, setItem } from '@/lib/storage';
 import { useColorScheme } from '@/lib/useColorScheme';
 import * as WebBrowser from 'expo-web-browser';
 import MarkdownText from '@/components/ui/MarkdownText';
+import { LoadingAnimation } from '@/components/ui/loading-animation';
 import {
   BottomSheetContent,
   BottomSheetHeader,
@@ -181,56 +182,18 @@ export function TopicUpdatesModal({
       </BottomSheetHeader>
 
       {/* Content */}
-      {isLoading && displayUpdates.length === 0 ? (
+      {(isLoading || isRefreshing) && displayUpdates.length === 0 ? (
         <BottomSheetView hadHeader={true}>
-          <View className="px-4 py-2">
-            {[1, 2, 3, 4].map((i) => (
-              <View 
-                key={i} 
-                className="mb-4 rounded-lg overflow-hidden border shadow-sm"
-                style={{
-                  backgroundColor: isDarkColorScheme ? '#27272a' : '#ffffff',
-                  borderColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7',
-                }}
-              >
-                <View className="p-4">
-                  <View 
-                    className="h-4 rounded-md mb-3" 
-                    style={{ 
-                      width: i === 1 ? '85%' : i === 2 ? '70%' : i === 3 ? '90%' : '75%', 
-                      backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' 
-                    }} 
-                  />
-                  <View 
-                    className="h-4 rounded-md mb-3" 
-                    style={{ 
-                      width: '95%', 
-                      backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' 
-                    }} 
-                  />
-                  <View 
-                    className="h-4 rounded-md mb-2" 
-                    style={{ 
-                      width: i === 2 ? '60%' : '80%', 
-                      backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' 
-                    }} 
-                  />
-                </View>
-                <View style={{ height: 1, backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' }} />
-                <View 
-                  className="py-3 px-4 items-center"
-                  style={{ backgroundColor: isDarkColorScheme ? 'rgba(63, 63, 70, 0.3)' : 'rgba(244, 244, 245, 0.5)' }}
-                >
-                  <View 
-                    className="h-3 rounded-md" 
-                    style={{ 
-                      width: 80, 
-                      backgroundColor: isDarkColorScheme ? '#3f3f46' : '#e4e4e7' 
-                    }} 
-                  />
-                </View>
-              </View>
-            ))}
+          <View className="flex-1 items-center justify-center py-12">
+            <LoadingAnimation 
+              title="Checking Updates..."
+              messages={[
+                'Analyzing completed topics...',
+                'Searching for new information...',
+                'Comparing with latest content...',
+                'Almost ready...'
+              ]}
+            />
           </View>
         </BottomSheetView>
       ) : displayUpdates.length === 0 ? (

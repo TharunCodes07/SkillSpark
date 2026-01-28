@@ -147,7 +147,7 @@ export function SubtopicsList({
           
           return (
             <SubtopicCard
-              key={subtopic.id}
+              key={`${subtopic.id}-${index}`}
               subtopic={subtopic}
               index={index}
               isExpanded={isExpanded}
