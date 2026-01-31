@@ -547,64 +547,6 @@ export function TopicAnalysisModal({
                 </Card>
               )}
 
-              {/* Strong Areas */}
-              {stats.strongCount > 0 && (
-                <Card className="mb-4">
-                  <View className="p-6">
-                    <View className="flex-row items-center gap-2 mb-3">
-                      <Trophy size={20} color={isDarkColorScheme ? '#22c55e' : '#16a34a'} />
-                      <Text className="text-lg font-semibold text-foreground">
-                        Strong Performance
-                      </Text>
-                    </View>
-                    <View 
-                      className="p-4 rounded-lg"
-                      style={{ backgroundColor: isDarkColorScheme ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.05)' }}
-                    >
-                      <Text className="text-3xl font-bold text-center mb-2" style={{ color: isDarkColorScheme ? '#22c55e' : '#16a34a' }}>
-                        {stats.strongCount}
-                      </Text>
-                      <Text className="text-sm text-center" style={{ color: isDarkColorScheme ? '#22c55e' : '#16a34a' }}>
-                        Subtopic{stats.strongCount !== 1 ? 's' : ''} where you're performing strongly
-                      </Text>
-                    </View>
-                  </View>
-                </Card>
-              )}
-
-              {/* Weak Areas */}
-              {stats.weakCount > 0 && (
-                <Card className="mb-4">
-                  <View className="p-6">
-                    <View className="flex-row items-center gap-2 mb-3">
-                      <TrendingUp size={20} color={isDarkColorScheme ? '#f59e0b' : '#d97706'} />
-                      <Text className="text-lg font-semibold text-foreground">
-                        Areas to Improve
-                      </Text>
-                    </View>
-                    <View 
-                      className="p-4 rounded-lg"
-                      style={{ backgroundColor: isDarkColorScheme ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.05)' }}
-                    >
-                      <Text className="text-3xl font-bold text-center mb-2" style={{ color: isDarkColorScheme ? '#f59e0b' : '#d97706' }}>
-                        {stats.weakCount}
-                      </Text>
-                      <Text className="text-sm text-center mb-3" style={{ color: isDarkColorScheme ? '#f59e0b' : '#d97706' }}>
-                        Subtopic{stats.weakCount !== 1 ? 's' : ''} that need more practice
-                      </Text>
-                      <View 
-                        className="mt-2 p-3 rounded-lg"
-                        style={{ backgroundColor: isDarkColorScheme ? '#fef3c7' : '#fffbeb' }}
-                      >
-                        <Text className="text-xs text-center" style={{ color: '#92400e' }}>
-                          💡 Tip: Focus on these areas in your next study session. Try the simplified or story versions!
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </Card>
-              )}
-
               {/* Quiz History */}
               {validQuizAttempts.length > 0 && (
                 <Card className="mb-4">

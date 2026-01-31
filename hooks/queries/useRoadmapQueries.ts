@@ -314,22 +314,25 @@ export function useSubmitQuiz() {
       userId, 
       quizId, 
       answers, 
-      roadmapId 
+      roadmapId,
+      topicId
     }: { 
       userId: string; 
       quizId: string; 
       answers: Record<string, any>; 
       roadmapId?: string;
+      topicId?: string;
     }) => {
       const result = await submitQuizAttempt(userId, quizId, answers, roadmapId);
-      return { ...result, userId, roadmapId, quizId };
+      return { ...result, userId, roadmapId, quizId, topicId };
     },
-    onSuccess: async ({ userId, roadmapId, quizId, leveledUp, oldLevel, newLevel, xpGained, score }) => {
+    onSuccess: async ({ userId, roadmapId, quizId, topicId, leveledUp, oldLevel, newLevel, xpGained, score }) => {
       // Use centralized cache invalidation for comprehensive cross-invalidation
       await cacheInvalidation.invalidateQuizSubmission(
         userId,
         quizId,
-        roadmapId
+        roadmapId,
+        topicId
       );
       // Invalidate user data to refresh XP/level display
       queryClient.invalidateQueries({

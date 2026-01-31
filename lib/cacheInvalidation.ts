@@ -104,6 +104,11 @@ export class CacheInvalidationService {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.topics.performance(userId, topicId) 
       });
+      
+      // Invalidate quiz attempts for this topic (for real-time updates in TopicAnalysisModal)
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeys.topics.detail(topicId, userId), 'quiz-attempts']
+      });
     }
     
     // Find and invalidate roadmaps that contain this topic

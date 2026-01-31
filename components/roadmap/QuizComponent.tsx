@@ -71,7 +71,8 @@ export function QuizComponent({ quizId, roadmapId, onQuizComplete, onBack }: Qui
         userId: currentUserId,
         quizId,
         answers,
-        roadmapId
+        roadmapId,
+        topicId: currentQuiz.quiz.topicId || undefined
       });
       
       setQuizResult(result);
