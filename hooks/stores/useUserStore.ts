@@ -9,7 +9,7 @@ import {
   useDeleteUser, 
   useUpdateUser
 } from '@/hooks/queries/useUserQueries';
-import { getAllUsers, getUserById } from '@/server/queries/users';
+import { getAllUsers, getUserById, createUser as createUserInDb } from '@/server/queries/users';
 import type { UserSchema } from '@/db/schema';
 import { z } from 'zod';
 
@@ -124,7 +124,17 @@ export const useUserStore = create<UserStoreState>()(
             console.log('UserStore: Using first available user:', users[0].name);
           }
           
-          // If still no users, we'll need to create one via the UI
+          // If still no users, create a default account on first install
+          if (!targetUserId && (!users || users.length === 0)) {
+            console.log('UserStore: No users found, creating default account...');
+            const defaultUser = await createUserInDb('My Account');
+            targetUserId = defaultUser.id;
+            
+            // Update the users cache with the new user
+            queryClient.setQueryData(queryKeys.users.all, [defaultUser]);
+            console.log('UserStore: Default account created:', defaultUser.name);
+          }
+          
           if (targetUserId) {
             // Capture userId in local const to avoid closure issues
             const userId = targetUserId;
