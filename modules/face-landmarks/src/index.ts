@@ -18,3 +18,5 @@ type FaceLandmarksModuleType = {
 
 export const FaceLandmarks =
   requireNativeModule<FaceLandmarksModuleType>("FaceLandmarks");
+
+export default FaceLandmarks;

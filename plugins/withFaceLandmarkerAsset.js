@@ -1,43 +1,68 @@
-const { withDangerousMod } = require('@expo/config-plugins');
-const fs = require('fs');
-const path = require('path');
+const { withDangerousMod } = require("@expo/config-plugins");
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
 
-/**
- * Expo Config Plugin to copy face_landmarker.task to Android assets
- * This runs after prebuild generates the android/ folder
- */
-const withFaceLandmarkerAsset = (config) => {
+const MODEL_URL =
+  "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
+
+function download(url, dest) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    https.get(url, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`Failed to download model: ${response.statusCode}`));
+        return;
+      }
+      response.pipe(file);
+      file.on("finish", () => file.close(resolve));
+    }).on("error", reject);
+  });
+}
+
+module.exports = function withFaceLandmarkerAsset(config) {
   return withDangerousMod(config, [
-    'android',
+    "android",
     async (config) => {
       const projectRoot = config.modRequest.projectRoot;
-      const sourceFile = path.join(projectRoot, 'face_landmarker.task');
-      const targetDir = path.join(
+
+      const tmpModelPath = path.join(
         projectRoot,
-        'android',
-        'app',
-        'src',
-        'main',
-        'assets'
+        "face_landmarker.task"
       );
-      const targetFile = path.join(targetDir, 'face_landmarker.task');
 
-      // Create assets directory if it doesn't exist
-      if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true });
+      const assetsDir = path.join(
+        projectRoot,
+        "android/app/src/main/assets"
+      );
+
+      const finalModelPath = path.join(
+        assetsDir,
+        "face_landmarker.task"
+      );
+
+      fs.mkdirSync(assetsDir, { recursive: true });
+
+      // 🔥 Download model if missing (EAS-safe)
+      if (!fs.existsSync(tmpModelPath)) {
+        console.log("⬇️ Downloading MediaPipe face_landmarker.task...");
+        await download(MODEL_URL, tmpModelPath);
       }
 
-      // Copy model file if source exists
-      if (fs.existsSync(sourceFile)) {
-        fs.copyFileSync(sourceFile, targetFile);
-        console.log('✅ Copied face_landmarker.task to Android assets');
-      } else {
-        console.warn('⚠️  face_landmarker.task not found in project root');
+      fs.copyFileSync(tmpModelPath, finalModelPath);
+
+      const sizeMB =
+        fs.statSync(finalModelPath).size / (1024 * 1024);
+
+      if (sizeMB < 3.5) {
+        throw new Error("❌ Downloaded model is corrupted");
       }
+
+      console.log(
+        `✅ MediaPipe model ready (${sizeMB.toFixed(2)} MB)`
+      );
 
       return config;
     },
   ]);
 };
-
-module.exports = withFaceLandmarkerAsset;

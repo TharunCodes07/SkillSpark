@@ -2,8 +2,8 @@ import type { ConfigContext, ExpoConfig } from "@expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "skillspark-2",
-  slug: "skillspark-2",
+  name: "skillspark",
+  slug: "skillspark",
   newArchEnabled: true,
   version: "1.0.0",
   orientation: "portrait",
@@ -56,19 +56,23 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     favicon: "./assets/images/favicon.png",
   },
   plugins: [
-    "expo-router", 
-    "expo-sqlite", 
-    "expo-font", 
-    "expo-web-browser",
-    "expo-secure-store",
-    [
-      "expo-camera",
-      {
-        cameraPermission: "Allow $(PRODUCT_NAME) to access your camera for emotion detection during learning.",
-      },
-    ],
-    "./plugins/withFaceLandmarkerAsset",
+  "expo-router",
+  "expo-sqlite",
+  "expo-font",
+  "expo-web-browser",
+  "expo-secure-store",
+  [
+    "expo-camera",
+    {
+      cameraPermission:
+        "Allow $(PRODUCT_NAME) to access your camera for emotion detection during learning.",
+    },
   ],
+  "./plugins/withFaceLandmarkerAsset"
+],
+
+
+
   experiments: {
     typedRoutes: true,
     baseUrl: "/expo-local-first-template",

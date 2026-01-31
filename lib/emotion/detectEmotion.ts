@@ -1,16 +1,16 @@
 import { EmotionDetector, normalizeLandmarks, type EmotionResult } from "./EmotionDetector";
 import { Platform } from "react-native";
+import { requireNativeModule } from "expo-modules-core";
 
-// Conditionally import native face landmarks module
+// Load native face landmarks module using requireNativeModule for production compatibility
 let FaceLandmarks: any = null;
-try {
-  if (Platform.OS !== "web") {
-    const faceLandmarksModule = require("@/modules/face-landmarks/src");
-    FaceLandmarks = faceLandmarksModule.FaceLandmarks;
+if (Platform.OS !== "web") {
+  try {
+    FaceLandmarks = requireNativeModule("FaceLandmarks");
+  } catch (e) {
+    console.warn("FaceLandmarks native module not available:", e);
+    FaceLandmarks = null;
   }
-} catch (error) {
-  console.warn("FaceLandmarks native module not available:", error);
-  FaceLandmarks = null;
 }
 
 const detector = new EmotionDetector();

@@ -21,6 +21,7 @@ import { Text } from "@/components/ui/text";
 import { Card } from "@/components/ui/card";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Brain, Camera, AlertCircle } from "lucide-react-native";
+import Constants from "expo-constants";
 
 // Import emotion detector with Python-ported logic
 import {
@@ -28,25 +29,33 @@ import {
   normalizeLandmarks,
   type EmotionResult as EmotionDetectorResult,
 } from "@/lib/emotion/EmotionDetector";
+import { requireNativeModule } from "expo-modules-core";
 
-// Conditionally import native face landmarks module
+// Load native face landmarks module using requireNativeModule for production compatibility
 let FaceLandmarks: any = null;
-let isFaceLandmarksAvailable = false;
-let FaceLandmarksResult: any;
 
-try {
-  if (Platform.OS !== "web") {
-    // Try to import the module - will throw if not available
-    const faceLandmarksModule = require("@/modules/face-landmarks/src");
-    FaceLandmarks = faceLandmarksModule.FaceLandmarks;
-    FaceLandmarksResult = faceLandmarksModule.FaceLandmarksResult;
-    isFaceLandmarksAvailable = FaceLandmarks !== null && FaceLandmarks !== undefined;
+if (Platform.OS !== "web") {
+  try {
+    FaceLandmarks = requireNativeModule("FaceLandmarks");
+  } catch (e) {
+    console.warn("FaceLandmarks native module not available:", e);
+    FaceLandmarks = null;
   }
-} catch (error) {
-  console.warn("FaceLandmarks native module not available:", error);
-  isFaceLandmarksAvailable = false;
-  FaceLandmarks = null;
 }
+
+// Runtime environment detection using expo-constants
+// AppOwnership is deprecated - use executionEnvironment instead
+const isExpoGo = Constants.appOwnership === "expo" || 
+  Constants.executionEnvironment === "storeClient";
+const isBareOrStandalone = 
+  Constants.executionEnvironment === "bare" || 
+  Constants.executionEnvironment === "standalone";
+
+// Emotion detection is supported in bare/standalone builds where the native module is available
+const isEmotionSupported =
+  Platform.OS !== "web" &&
+  FaceLandmarks != null &&
+  !isExpoGo;
 
 interface EmotionResultState {
   emotion: string;
@@ -189,7 +198,7 @@ export function TopicEmotionDetector({
 
   // Set up detection interval - runs only once on mount
   useEffect(() => {
-    if (!isFaceLandmarksAvailable) return;
+    if (!isEmotionSupported) return;
 
     console.log('🔄 Setting up emotion detection interval (30 seconds)');
 
@@ -261,24 +270,38 @@ export function TopicEmotionDetector({
     return labels[emotionName] || emotionName;
   };
 
-  // Early return if native module is not available
-  if (!isFaceLandmarksAvailable) {
+  // Early return if emotion detection is not supported
+  if (!isEmotionSupported) {
+    // Different message for Expo Go vs other issues
+    const isModuleMissing = FaceLandmarks == null;
+    const title = isExpoGo
+      ? "Emotion Detection Unavailable (Expo Go)"
+      : isModuleMissing
+        ? "Emotion Detection Module Missing"
+        : "Emotion Detection Unavailable";
+    const description = isExpoGo
+      ? "Emotion detection requires a development build with native modules. This feature is not available in Expo Go."
+      : isModuleMissing
+        ? "The FaceLandmarks native module could not be loaded. Please rebuild the app."
+        : "Emotion detection is not supported on this platform.";
+
     return (
       <Card className="mx-4 mb-4 border-yellow-500">
         <View className="p-4">
           <View className="flex-row items-center space-x-2 mb-2">
             <AlertCircle className="h-5 w-5 text-yellow-600" />
             <Text className="font-semibold text-yellow-700 ml-2">
-              Emotion Detection Unavailable
+              {title}
             </Text>
           </View>
           <Text className="text-sm text-muted-foreground">
-            Emotion detection requires a development build with native modules.
-            This feature is not available in Expo Go.
+            {description}
           </Text>
-          <Text className="text-xs text-muted-foreground mt-2">
-            Run: npx expo prebuild && npx expo run:android
-          </Text>
+          {isExpoGo && (
+            <Text className="text-xs text-muted-foreground mt-2">
+              Run: npx expo prebuild && npx expo run:android
+            </Text>
+          )}
         </View>
       </Card>
     );
