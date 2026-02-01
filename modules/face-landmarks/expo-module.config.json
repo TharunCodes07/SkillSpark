@@ -2,6 +2,6 @@
   "name": "face-landmarks",
   "platforms": ["android"],
   "android": {
-    "modules": ["FaceLandmarksModule"]
+    "modules": ["expo.modules.facelandmarks.FaceLandmarksModule"]
   }
 }

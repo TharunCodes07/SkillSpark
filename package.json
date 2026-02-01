@@ -19,6 +19,7 @@
     "expo-check": "bun expo install --check"
   },
   "dependencies": {
+    "face-landmarks": "./modules/face-landmarks",
     "@expo-google-fonts/inter": "^0.4.0",
     "@google/generative-ai": "^0.24.1",
     "@gorhom/bottom-sheet": "^5.1.6",

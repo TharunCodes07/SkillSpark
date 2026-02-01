@@ -1,5 +1,8 @@
 import { requireNativeModule } from "expo-modules-core";
 
+export default requireNativeModule("FaceLandmarks");
+
+
 export type NormalizedLandmark = {
   x: number;
   y: number;
@@ -19,4 +22,3 @@ type FaceLandmarksModuleType = {
 export const FaceLandmarks =
   requireNativeModule<FaceLandmarksModuleType>("FaceLandmarks");
 
-export default FaceLandmarks;
